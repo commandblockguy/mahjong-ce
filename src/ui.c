@@ -200,8 +200,24 @@ uint8_t layouts_menu() {
 				}
 	
 				if(kb_Data[1] == kb_2nd) {
-					/* Load the selected layout */
-					load_layout(&layouts[selection], true);
+					for(i = 0; i < LAYOUT_TRIES; i++) {
+						/* Load the selected layout */
+						load_layout(&layouts[selection], true);
+						if(calc_num_moves()) break;
+					}
+					if(i == LAYOUT_TRIES) {
+						/* Could not add tiles in a way that does not immediately result in a loss */
+						const char *str_imm_loss = "Error: Layout results in immediate loss.";
+
+						gfx_FillScreen(BACKGROUND_COLOR);
+						gfx_SetTextFGColor(WHITE);
+						gfx_PrintStringXY(str_imm_loss, (LCD_WIDTH - gfx_GetStringWidth(str_imm_loss)) / 2, (LCD_HEIGHT - TEXT_HEIGHT) / 2);
+						gfx_BlitBuffer();
+
+						while(kb_Data[1]) kb_Scan();
+						while(!(kb_Data[1] || kb_Data[6] || kb_Data[7])) kb_Scan();
+						continue;
+					}
 					return 0;
 				}
 

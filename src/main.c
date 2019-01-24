@@ -101,9 +101,6 @@ void play() {
 	game.status = IN_PROGRESS;
 	game.hl_x = game.hl_y = game.hl_z = -1;
 
-	/* Calculate the number of possible starting moves */
-	calc_num_moves();
-
 	/* Draw the tiles and infobar */
 	rerender();
 

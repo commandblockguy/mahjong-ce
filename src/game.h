@@ -36,10 +36,12 @@ typedef uint8_t tile_t;
 #define SHIFT_X 2
 #define SHIFT_Y 2
 
+/* Size of the tiel array */
 #define TILES_X 17
 #define TILES_Y 10
 #define TILES_Z 8
 
+/* Colors */
 #define BACKGROUND_COLOR 1
 #define BOTTOM_COLOR 2
 #define SIDE_COLOR 3
@@ -64,6 +66,9 @@ typedef uint8_t tile_t;
 #define MM_HOWTO 1
 #define MM_CREDITS 2
 #define MM_EXIT 3
+
+/* Number of times loading a layout can result in no valid moves before giving up */
+#define LAYOUT_TRIES 10
 
 #define check_value get_ans
 
