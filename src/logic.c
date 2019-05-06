@@ -120,10 +120,10 @@ bool remove_tiles(uint8_t x1, uint8_t y1,  uint8_t z1, uint8_t x2, uint8_t y2, u
 
 	game.remaining_tiles -= 2;
 
-	if(!game.remaining_tiles) game.status = WIN;
-
 	/* Recalculate the number of moves */
 	calc_num_moves();
+
+	if(!game.remaining_tiles) game.status = WIN;
 
 	return true;
 }
