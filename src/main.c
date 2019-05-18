@@ -97,12 +97,7 @@ void play() {
 	uint8_t cursor_y = LCD_HEIGHT / 2;
 
 	/* Initialise things */
-	game.remaining_tiles = TILE_TYPES * 4;
-	game.status = IN_PROGRESS;
-	game.undos = 0;
-	game.redos = 0;
 	set_highlight(-1, -1, -1);
-	game.magnifier_shown = false;
 
 	/* Draw the tiles and infobar */
 	rerender();

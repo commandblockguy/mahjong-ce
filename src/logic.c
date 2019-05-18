@@ -288,6 +288,13 @@ void load_layout(layout_t *l, bool random) {
 		game.tiles[x][y][z] = tile;
 	}
 
+	/* Initialize some stuff. Why is this here? No clue. */
+	game.remaining_tiles = TILE_TYPES * 4;
+	game.status = IN_PROGRESS;
+	game.undos = 0;
+	game.redos = 0;
+	game.magnifier_shown = false;
+
 	memcpy(game.initial_tiles, game.tiles, sizeof(game.tiles));
 }
 
