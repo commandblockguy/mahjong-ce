@@ -127,6 +127,7 @@ uint8_t layouts_menu() {
 		pack_meta_t meta;
 		layout_t *layouts;
 		bool key_pressed = true;
+		uint8_t key_time = 0;
 
 		/* Clear was pressed, or something. */
 		if(strcmp(game.pack_name, "") == 0) return 1;
@@ -193,7 +194,7 @@ uint8_t layouts_menu() {
 			uint8_t width;
 			/* Handle keypresses, yada yada. */
 			kb_Scan();
-			if(!key_pressed) {
+			if(!key_pressed || key_time >= 10) {
 				if(kb_Data[6] == kb_Clear) {
 					packs_menu();
 					break;
@@ -296,6 +297,9 @@ uint8_t layouts_menu() {
 
 			/* If a key is pressed, wait for it to release */
 			key_pressed = kb_Data[1] || kb_Data[6] || kb_Data[7];
+
+			if(!key_pressed) key_time = 0;
+			else if(key_time < 10) key_time++;
 		}
 	}
 }
@@ -556,9 +560,10 @@ void win_popup(void) {
 }
 
 /* 0: restart level */
-/* 1: exit to main menu */
+/* 1: undo last move */
+/* 2: exit to main menu */
 uint8_t lose_popup(void) {
-	const char *strs[2] = {"Restart", "Quit"};
+	const char *strs[3] = {"Restart", "Undo", "Quit"};
 	uint8_t i, selection = 0;
 	bool key_pressed = true;
 	
@@ -580,20 +585,20 @@ uint8_t lose_popup(void) {
 	
 		/* Literally the same thing as every other thing. */
 		if(!key_pressed) {
-			if(kb_Data[6] & kb_Clear) return 1;
+			if(kb_Data[6] & kb_Clear) return 2;
 			if(kb_Data[1] & kb_2nd) return selection;
 
 			if(kb_Data[7] & kb_Up) selection--;
 			if(kb_Data[7] & kb_Down) selection++;
 
-			if(selection >= 2) selection = 0;
-			if(selection == -1) selection = 1;
+			if(selection >= 3) selection = 0;
+			if(selection == -1) selection = 2;
 		}
 	
 		/* Go read my other comments, I'm tired of writing these. */
 		key_pressed = kb_Data[1] || kb_Data[6] || kb_Data[7];
 	
-		for(i = 0; i < 2; i++) {
+		for(i = 0; i < 3; i++) {
 			uint24_t time = get_hs(game.layout.name, i);
 			uint24_t minutes;
 	

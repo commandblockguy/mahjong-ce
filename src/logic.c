@@ -104,6 +104,7 @@ bool top_blocked(uint8_t x, uint8_t y, uint8_t z) {
 
 /* Returns true if successful */
 bool remove_tiles(uint8_t x1, uint8_t y1,  uint8_t z1, uint8_t x2, uint8_t y2, uint8_t z2) {
+	undo_t *undo;
 	/* Check if tiles are the same */
 	if(get_type(x1, y1, z1) != get_type(x2, y2, z2)) return false;
 
@@ -113,6 +114,23 @@ bool remove_tiles(uint8_t x1, uint8_t y1,  uint8_t z1, uint8_t x2, uint8_t y2, u
 	/* Check if both tiles can be removed */
 	if(!is_removable(x1, y1, z1)) return false;
 	if(!is_removable(x2, y2, z2)) return false;
+
+	/* Make the move undo-able */
+	undo = &game.undo_stack[game.undos];
+
+	undo->pos1.x = x1;
+	undo->pos1.y = y1;
+	undo->pos1.z = z1;
+
+	undo->pos2.x = x2;
+	undo->pos2.y = y2;
+	undo->pos2.z = z2;
+
+	undo->tile1 = game.tiles[x1][y1][z1];
+	undo->tile2 = game.tiles[x2][y2][z2];
+
+	game.undos++;
+	game.redos = 0;
 
 	/* Remove the tiles */
 	game.tiles[x1][y1][z1] = NO_TILE;
@@ -164,7 +182,8 @@ uint8_t calc_num_moves() {
 	return game.possible_moves = moves;
 }
 
-void update_highlight(uint24_t cursor_x, uint8_t cursor_y) {
+pos_t find_highlight(uint24_t cursor_x, uint8_t cursor_y) {
+	pos_t ret = {-1, -1, -1};
 	int z_level;
 	for(z_level = TILES_Z - 1; z_level >= 0; z_level--) {
 		/* Start from the top and work our way down */
@@ -183,12 +202,15 @@ void update_highlight(uint24_t cursor_x, uint8_t cursor_y) {
 
 		for(x_i = x_tile - 1; x_i <= x_tile; x_i++) {
 			for(y_i = y_tile; y_i <= y_tile + 1; y_i++) {
-				uint24_t base_x = tile_base_x(x_i, y_i, z_level);
-				uint8_t  base_y = tile_base_y(x_i, y_i, z_level);
+				uint24_t base_x;
+				uint8_t  base_y;
 
 				/* Check if tile exists */
 
 				if(!get_type(x_i, y_i, z_level)) continue;
+
+				base_x = tile_base_x(x_i, y_i, z_level);
+				base_y = tile_base_y(x_i, y_i, z_level);
 
 				/* Check if the cursor overlaps this tile */
 
@@ -197,14 +219,17 @@ void update_highlight(uint24_t cursor_x, uint8_t cursor_y) {
 				if(cursor_y < base_y) continue;
 				if(cursor_y > base_y + TILE_HEIGHT) continue;
 
-				set_highlight(x_i, y_i, z_level);
-				return;
+				ret.x = x_i;
+				ret.y = y_i;
+				ret.z = z_level;
+
+				return ret;
 			}
 		}
 	}
 
 	/* Reset the highlight */
-	set_highlight(-1, -1, -1);
+	return ret;
 }
 
 void load_layout(layout_t *l, bool random) {
@@ -268,9 +293,9 @@ void load_layout(layout_t *l, bool random) {
 
 /* I guess this can go here. */
 void set_highlight(int8_t x, int8_t y, int8_t z) {
-	game.hl_x = x;
-	game.hl_y = y;
-	game.hl_z = z;
+	game.highlight.x = x;
+	game.highlight.y = y;
+	game.highlight.z = z;
 }
 
 void reset_timer(uint24_t ms) {
@@ -278,4 +303,45 @@ void reset_timer(uint24_t ms) {
 	timer_Control = TIMER1_DISABLE;
 	timer_1_Counter = ms * 33;
 	timer_Control = TIMER1_ENABLE | TIMER1_32K | TIMER1_UP;
+}
+
+bool undo(void) {
+	undo_t *data;
+
+	if(!game.undos) return false;
+
+	data = &game.undo_stack[game.undos - 1];
+
+	/* Add the tiles back */
+	game.tiles[data->pos1.x][data->pos1.y][data->pos1.z] = data->tile1;
+	game.tiles[data->pos2.x][data->pos2.y][data->pos2.z] = data->tile2;
+
+	game.remaining_tiles += 2;
+
+	calc_num_moves();
+
+	game.redos++;
+	game.undos--;
+
+	return true;
+}
+
+bool redo(void) {
+	undo_t *data;
+
+	if(!game.redos) return false;
+
+	data = &game.undo_stack[game.undos];
+
+	game.tiles[data->pos1.x][data->pos1.y][data->pos1.z] = NO_TILE;
+	game.tiles[data->pos2.x][data->pos2.y][data->pos2.z] = NO_TILE;
+
+	game.remaining_tiles -= 2;
+
+	calc_num_moves();
+
+	game.undos++;
+	game.redos--;
+
+	return true;
 }

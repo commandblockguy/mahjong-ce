@@ -99,7 +99,10 @@ void play() {
 	/* Initialise things */
 	game.remaining_tiles = TILE_TYPES * 4;
 	game.status = IN_PROGRESS;
-	game.hl_x = game.hl_y = game.hl_z = -1;
+	game.undos = 0;
+	game.redos = 0;
+	set_highlight(-1, -1, -1);
+	game.magnifier_shown = false;
 
 	/* Draw the tiles and infobar */
 	rerender();
@@ -132,33 +135,81 @@ void play() {
 		if(cursor_y > LCD_HEIGHT) cursor_y = 0;
 
 		if(kb_Data[1] & kb_2nd) {
+			bool removed;
 
 			/* Save the highlighted tile, if any */
-			int8_t bk_hl_x = game.hl_x;
-			int8_t bk_hl_y = game.hl_y;
-			int8_t bk_hl_z = game.hl_z;
+			pos_t old;
+			memcpy(&old, &game.highlight, sizeof(pos_t));
 
 			/* Get which tile is under the cursor and highlight it */
-			update_highlight(cursor_x, cursor_y);
+			game.highlight = find_highlight(cursor_x, cursor_y);
 
 			/* Try to remove both tiles */
-			remove_tiles(game.hl_x, game.hl_y, game.hl_z, bk_hl_x, bk_hl_y, bk_hl_z);
+			removed = remove_tiles(game.highlight.x, game.highlight.y, game.highlight.z, old.x, old.y, old.z);
 
 			/* Reset the highlight if the tile is not removable */
 
-			if(!is_removable(game.hl_x, game.hl_y, game.hl_z)) {
+			if(!is_removable(game.highlight.x, game.highlight.y, game.highlight.z)) {
 				set_highlight(-1, -1, -1);
 			}
 
-			/* Redraw everything */
+			/* Redraw everything if necessary */
+			if(removed || game.highlight.x != old.x || game.highlight.y != old.y || game.highlight.z != old.z);
+				rerender();
+		}
 
-			rerender();
+		if(kb_Data[2] & kb_Alpha) {
+			if(undo()) rerender();
+			while(kb_Data[2]) kb_Scan();
+		}
+
+		if(kb_Data[3] & kb_GraphVar) {
+			if(redo()) rerender();
+			while(kb_Data[3]) kb_Scan();
+		}
+
+		if(kb_Data[4] & kb_Stat) {
+			if(game.magnifier_shown) {
+				game.magnifier_shown = false;
+				rerender();
+				// TODO: shift the level over a bit
+			} else {
+				game.magnifier_shown = true;
+			}
+			while(kb_Data[4]) kb_Scan();
 		}
 
 		/* Render things */
 		
 		render_stopwatch();
+		if(game.magnifier_shown)
+			draw_magnifier(cursor_x, cursor_y);
 		draw_cursor(cursor_x, cursor_y);
+
+		if(game.status == LOSE) {
+			set_last_level(game.pack_name, game.layout.name);
+			switch(lose_popup()) {
+				case 0:
+					/* Restart level */
+
+					/* Copy the backup of tiles into game.tiles */
+					memcpy(game.tiles, game.initial_tiles, TILES_X * TILES_Y * TILES_Z * sizeof(tile_t));
+
+					/* Start the timer over */
+					reset_timer(0);
+
+					/* Tail-recurse */
+					play();
+					return;
+				case 1:
+					/* Undo */
+					if(undo()) {
+						game.status = IN_PROGRESS;
+						rerender();
+					}
+					break;
+			}
+		}
 	}
 
 	/* If a win, add the time to the high scores, and set the last played level */
@@ -168,22 +219,6 @@ void play() {
 		add_hs(timer_1_Counter / 33, game.layout.name);
 		set_last_level(game.pack_name, game.layout.name);
 		win_popup();
-	}
-
-	if(game.status == LOSE) {
-		set_last_level(game.pack_name, game.layout.name);
-		if(lose_popup() == 0) {
-			/* Restart level */
-
-			/* Copy the backup of tiles into game.tiles */
-			memcpy(game.tiles, game.initial_tiles, TILES_X * TILES_Y * TILES_Z * sizeof(tile_t));
-
-			/* Start the timer over */
-			reset_timer(0);
-
-			/* Tail-recurse */
-			play();
-		}
 	}
 
 	if(game.status == EXIT_NO_SAVE) {

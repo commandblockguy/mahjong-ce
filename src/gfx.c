@@ -55,7 +55,7 @@ void render_tiles() {
 				if(game.tiles[x][y][z])
 					/* Adding this check here speeds things up drastically since	*
 					 * a frame doesn't need to be allocated for the function		*/
-					render_tile(x, y, z, game.hl_x == x && game.hl_y == y && game.hl_z == z);
+					render_tile(x, y, z, game.highlight.x == x && game.highlight.y == y && game.highlight.z == z);
 			}
 		}
 	}
@@ -149,8 +149,8 @@ void render_stopwatch(void) {
 	gfx_SetColor(INFOBAR_COLOR);
 	gfx_FillRectangle(LCD_WIDTH - STOPWATCH_WIDTH, LCD_HEIGHT - INFOBAR_HEIGHT, STOPWATCH_WIDTH, INFOBAR_HEIGHT);
 
-	gfx_SetTextXY(LCD_WIDTH - STOPWATCH_WIDTH, LCD_HEIGHT - INFOBAR_HEIGHT / 2 - 4);
 	gfx_SetTextFGColor(WHITE);
+	gfx_SetTextXY(LCD_WIDTH - STOPWATCH_WIDTH, LCD_HEIGHT - INFOBAR_HEIGHT / 2 - 4);
 
 	minutes = ms / 60000;
 	seconds = (ms / 1000) % 60;
@@ -170,4 +170,42 @@ uint24_t tile_base_x(uint8_t x, uint8_t y, uint8_t z) {
 }
 uint8_t tile_base_y(uint8_t x, uint8_t y, uint8_t z) {
 	return game.layout.start_y + (y * TILE_HEIGHT) - SHIFT_Y * z - (is_offset_up(x, y, z) ? TILE_HEIGHT / 2 : 0);
+}
+
+void draw_magnifier(uint24_t csr_x, uint8_t csr_y) {
+	uint24_t x = LCD_WIDTH  - MAGNIFIER_X * MAGNIFIER_SCALE;
+	uint24_t y = LCD_HEIGHT - MAGNIFIER_Y * MAGNIFIER_SCALE - INFOBAR_HEIGHT;
+
+	gfx_TempSprite(mag, MAGNIFIER_X, MAGNIFIER_Y);
+
+	/* Clip the copied sprite */
+
+	int24_t left  = csr_x - MAGNIFIER_X / 2;
+	int24_t right = csr_x + MAGNIFIER_X / 2;
+	int24_t up    = csr_y - MAGNIFIER_Y / 2;
+	int24_t down  = csr_y + MAGNIFIER_Y / 2;
+
+	if(left < 0) left = 0;
+	if(right > LCD_WIDTH) right = LCD_WIDTH;
+	if(up < 0) up = 0;
+	if(down > LCD_HEIGHT) down = LCD_HEIGHT;
+
+	/* Fill the background so there are no issues */
+	gfx_SetColor(BACKGROUND_COLOR);
+	gfx_FillRectangle_NoClip(x, y, MAGNIFIER_X * MAGNIFIER_SCALE, MAGNIFIER_Y * MAGNIFIER_SCALE);
+
+	/* Copy the area around the cursor */
+	mag->width = right - left;
+	mag->height = down - up;
+	gfx_GetSprite(mag, left, up);
+
+	/* Draw the lines bordering the magnifier */
+	gfx_SetColor(WHITE);
+	gfx_HorizLine_NoClip(x - 1, y - 1, MAGNIFIER_X * MAGNIFIER_SCALE + 1);
+	gfx_VertLine_NoClip (x - 1, y - 1, MAGNIFIER_Y * MAGNIFIER_SCALE + 1);
+
+	gfx_ScaledSprite_NoClip(mag,
+		x + MAGNIFIER_SCALE * (left - csr_x + MAGNIFIER_X / 2),
+		y + MAGNIFIER_SCALE * (up   - csr_y + MAGNIFIER_Y / 2),
+		MAGNIFIER_SCALE, MAGNIFIER_SCALE);
 }

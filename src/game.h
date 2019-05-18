@@ -58,6 +58,10 @@ typedef uint8_t tile_t;
 #define INFOBAR_HEIGHT 12
 #define STOPWATCH_WIDTH 64
 
+#define MAGNIFIER_X 32
+#define MAGNIFIER_Y 32
+#define MAGNIFIER_SCALE 3
+
 #define SCORES 8
 
 #define TEXT_HEIGHT 8
@@ -71,6 +75,19 @@ typedef uint8_t tile_t;
 #define LAYOUT_TRIES 10
 
 #define check_value get_ans
+
+typedef struct Position {
+	int8_t x;
+	int8_t y;
+	int8_t z;
+} pos_t;
+
+typedef struct Undo {
+	pos_t pos1;
+	pos_t pos2;
+	tile_t tile1;
+	tile_t tile2;
+} undo_t;
 
 /* Giant jumbled mess of function declarations */
 
@@ -87,12 +104,13 @@ bool is_offset_up(uint8_t x, uint8_t y, uint8_t z);
 bool is_offset_right(uint8_t x, uint8_t y, uint8_t z);
 uint24_t tile_base_x(uint8_t x, uint8_t y, uint8_t z);
 uint8_t tile_base_y(uint8_t x, uint8_t y, uint8_t z);
-void update_highlight(uint24_t x, uint8_t y);
+pos_t find_highlight(uint24_t x, uint8_t y);
 void set_highlight(int8_t x, int8_t y, int8_t z);
 uint8_t calc_num_moves(void);
 void load_layout(layout_t *l, bool random);
 void shuffle(uint8_t * array, uint24_t size);
 void render_stopwatch(void);
+void draw_magnifier(uint24_t csrX, uint8_t csrY);
 void draw_infobar(void);
 void rerender(void);
 uint8_t num_digits(uint8_t n);
@@ -118,6 +136,8 @@ void win_popup(void);
 void set_last_level(char *pack, char *level);
 uint8_t lose_popup(void);
 void save_game(uint24_t timer);
+bool undo(void);
+bool redo(void);
 
 enum game_status {
 	IN_PROGRESS,
@@ -133,15 +153,18 @@ typedef struct {
 	tile_t tiles[TILES_X][TILES_Y][TILES_Z];
 	/* Backup of the starting conditions */
 	tile_t initial_tiles[TILES_X][TILES_Y][TILES_Z];
+	/* Stack containing info about how to undo/redo */
+	undo_t undo_stack[TILE_TYPES * 2];
+	uint8_t undos;
+	uint8_t redos;
 	/* Tile which is highlighted */
-	int8_t hl_x;
-	int8_t hl_y;
-	int8_t hl_z;
+	pos_t highlight;
 	/* Pointer to the currently loaded layout */
 	/* Is set in the load_layout function */
 	layout_t layout;
 	uint8_t remaining_tiles;
 	uint8_t possible_moves;
+	bool magnifier_shown;
 	char pack_name[9];
 } game_t;
 
