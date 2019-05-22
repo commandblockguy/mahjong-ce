@@ -148,21 +148,25 @@ bool remove_tiles(uint8_t x1, uint8_t y1,  uint8_t z1, uint8_t x2, uint8_t y2, u
 
 /* Calcuate the number of possible moves */
 uint8_t calc_num_moves() {
-	uint8_t num_removable[TILE_TYPES * 4] = {0};
+	uint8_t num_removable[TILE_TYPES] = {0};
 	uint8_t x, y, z, i, moves = 0;
+
+	memset(game.tile_count, 0, sizeof(game.tile_count));
 
 	/* Count how many removable tiles of each type there are */
 	for(z = 0; z < TILES_Z; z++) {
 		for(y = 0; y < TILES_Y; y++) {
 			for(x = 0; x < TILES_X; x++) {
+				tile_t type = get_type(x, y, z);
+				game.tile_count[type - 1]++;
 				if(is_removable(x, y, z))
-					num_removable[get_type(x, y, z) - 1]++;
+					num_removable[type - 1]++;
 			}
 		}
 	}
 
 	/* Add the number of possible moves within the set of removable tiles of one type to the total */
-	for(i = 0; i < TILE_TYPES * 4; i++) {
+	for(i = 0; i < TILE_TYPES; i++) {
 		switch(num_removable[i]) {
 			case 2:
 				moves +=1;

@@ -12,12 +12,15 @@
 #include <keypadc.h>
 #include <fileioc.h>
 
+#include <debug.h>
+
 #include "game.h"
 #include "gfx/tiles_gfx.h"
 #include "layouts.h"
 
 
 void rerender() {
+	dbg_sprintf(dbgout, "redrawing\n");
 	gfx_FillScreen(BACKGROUND_COLOR);
 	render_tiles();
 	draw_infobar();
@@ -208,4 +211,18 @@ void draw_magnifier(uint24_t csr_x, uint8_t csr_y) {
 		x + MAGNIFIER_SCALE * (left - csr_x + MAGNIFIER_X / 2),
 		y + MAGNIFIER_SCALE * (up   - csr_y + MAGNIFIER_Y / 2),
 		MAGNIFIER_SCALE, MAGNIFIER_SCALE);
+}
+
+void render_tile_info(tile_t tile) {
+	/* Erase the previous stuff */
+	gfx_SetColor(BACKGROUND_COLOR);
+	gfx_FillRectangle(0, 0, TILE_WIDTH + 4 + gfx_GetStringWidth(" x 0"), TILE_HEIGHT + 4);
+
+	if(tile) {
+		render_raw_tile(2, 2, tile, false);
+		gfx_SetTextFGColor(WHITE);
+		gfx_SetTextScale(1, 1);
+		gfx_PrintStringXY(" x ", TILE_WIDTH + 2, 2 + (TILE_HEIGHT - TEXT_HEIGHT) / 2);
+		gfx_PrintUInt(game.tile_count[tile - 1], 1);
+	}
 }

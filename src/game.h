@@ -138,6 +138,7 @@ uint8_t lose_popup(void);
 void save_game(uint24_t timer);
 bool undo(void);
 bool redo(void);
+void render_tile_info(tile_t tile);
 
 enum game_status {
 	IN_PROGRESS,
@@ -153,6 +154,8 @@ typedef struct {
 	tile_t tiles[TILES_X][TILES_Y][TILES_Z];
 	/* Backup of the starting conditions */
 	tile_t initial_tiles[TILES_X][TILES_Y][TILES_Z];
+	/* Count of each tile type */
+	tile_t tile_count[TILE_TYPES];
 	/* Stack containing info about how to undo/redo */
 	undo_t undo_stack[TILE_TYPES * 2];
 	uint8_t undos;

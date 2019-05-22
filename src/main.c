@@ -98,12 +98,15 @@ void play() {
 
 	/* Initialise things */
 	set_highlight(-1, -1, -1);
+	calc_num_moves();
 
 	/* Draw the tiles and infobar */
 	rerender();
 
 	/* Main loop */
 	while(game.status == IN_PROGRESS) {
+		pos_t hover;
+
 		/* Handle keypresses */
 		kb_Scan();
 
@@ -149,8 +152,9 @@ void play() {
 			}
 
 			/* Redraw everything if necessary */
-			if(removed || game.highlight.x != old.x || game.highlight.y != old.y || game.highlight.z != old.z);
+			if(removed || game.highlight.x != old.x || game.highlight.y != old.y || game.highlight.z != old.z) {
 				rerender();
+			}
 		}
 
 		if(kb_Data[2] & kb_Alpha) {
@@ -175,6 +179,9 @@ void play() {
 		}
 
 		/* Render things */
+
+		hover = find_highlight(cursor_x, cursor_y);
+		render_tile_info(get_type(hover.x, hover.y, hover.z));
 		
 		render_stopwatch();
 		if(game.magnifier_shown)
