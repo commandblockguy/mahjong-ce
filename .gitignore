@@ -1,5 +1,6 @@
 /bin/
 /obj/
-/src/gfx/*.c
-/src/gfx/*.h
+/src/gfx/tilemap.c
+/src/gfx/tiles_gfx.c
+/src/gfx/tiles_gfx.h
 /src/gfx/convpng.log

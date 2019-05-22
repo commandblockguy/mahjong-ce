@@ -216,13 +216,13 @@ void draw_magnifier(uint24_t csr_x, uint8_t csr_y) {
 void render_tile_info(tile_t tile) {
 	/* Erase the previous stuff */
 	gfx_SetColor(BACKGROUND_COLOR);
-	gfx_FillRectangle(0, 0, TILE_WIDTH + 4 + gfx_GetStringWidth(" x 0"), TILE_HEIGHT + 4);
+	gfx_FillRectangle(2, 2, TILE_WIDTH + 4 + gfx_GetStringWidth(" x 0"), TILE_HEIGHT + 4);
 
 	if(tile) {
-		render_raw_tile(2, 2, tile, false);
+		render_raw_tile(4, 2, tile, false);
 		gfx_SetTextFGColor(WHITE);
 		gfx_SetTextScale(1, 1);
-		gfx_PrintStringXY(" x ", TILE_WIDTH + 2, 2 + (TILE_HEIGHT - TEXT_HEIGHT) / 2);
+		gfx_PrintStringXY(" x ", TILE_WIDTH + 4, 2 + (TILE_HEIGHT - TEXT_HEIGHT) / 2);
 		gfx_PrintUInt(game.tile_count[tile - 1], 1);
 	}
 }
