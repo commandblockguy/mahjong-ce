@@ -25,6 +25,7 @@ clean_gfx:
 	-rm src/gfx/convpng.log
 	-rm src/gfx/*.c
 	-rm src/gfx/*.h
+	-rm src/gfx/palette
 
 # Format a release for the Cemetech archives
 release:

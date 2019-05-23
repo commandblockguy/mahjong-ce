@@ -16,6 +16,7 @@
 
 #include "game.h"
 #include "gfx/tiles_gfx.h"
+#include "gfx/gfx_group.h"
 #include "layouts.h"
 
 
@@ -126,13 +127,12 @@ void render_raw_tile(int24_t base_x, int24_t base_y, uint8_t type, bool highligh
 /* Draw the cursor without redrawing everything else */
 void draw_cursor(uint24_t x, uint8_t y) {
 	/* Temporary sprite to hold the section of the screen the cursor draws over */
-	gfx_TempSprite(temp_sprite, 3, 3);
+	gfx_TempSprite(temp_sprite, cursor_width, cursor_height);
 
-	gfx_GetSprite(temp_sprite, x - 1, y - 1);
+	gfx_GetSprite(temp_sprite, x, y);
 
 	/* Draw the cursor */
-	gfx_SetColor(CURSOR_COLOR);
-	gfx_FillRectangle(x - 1, y - 1, 3, 3);
+	gfx_TransparentSprite(cursor, x, y);
 
 	/* Copy the graphics buffer to the screen */
 
@@ -140,7 +140,7 @@ void draw_cursor(uint24_t x, uint8_t y) {
 
 	/* In the buffer, remove the cursor again by drawing the sprite over it */
 
-	gfx_Sprite(temp_sprite, x - 1, y - 1);
+	gfx_Sprite(temp_sprite, x, y);
 
 }
 

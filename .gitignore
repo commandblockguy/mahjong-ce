@@ -3,7 +3,7 @@
 /release_tmp/
 /mahjong.zip
 /KYODAI.8xv
-/src/gfx/tilemap.c
-/src/gfx/tiles_gfx.c
-/src/gfx/tiles_gfx.h
+/src/gfx/*.c
+/src/gfx/*.h
+/src/gfx/palette
 /src/gfx/convpng.log
