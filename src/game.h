@@ -66,10 +66,13 @@ typedef uint8_t tile_t;
 
 #define TEXT_HEIGHT 8
 
-#define MM_PLAY 0
-#define MM_HOWTO 1
-#define MM_CREDITS 2
-#define MM_EXIT 3
+enum MM_Options {
+	MM_RESUME,
+	MM_NEW_GAME,
+	MM_HOWTO,
+	MM_CREDITS,
+	MM_EXIT
+};
 
 /* Number of times loading a layout can result in no valid moves before giving up */
 #define LAYOUT_TRIES 10

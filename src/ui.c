@@ -17,6 +17,7 @@
 #include <debug.h>
 
 #include "game.h"
+#include "gfx/tiles_gfx.h"
 
 /* One pixel padding, plus one pixel thick line */
 #define BUTTON_HEIGHT TEXT_HEIGHT + 4
@@ -25,12 +26,6 @@
 #define MM_SIDE_WIDTH 25
 
 #define PACKS_MENU_LINES 30
-
-const char* str_play = "Play";
-const char* str_howto = "How to Play";
-const char* str_credits = "Credits";
-const char* str_exit = "Exit";
-const char* str_hs = "high scores:";
 
 uint8_t main_menu() {
 	int selection = 0, i, start, offset;
@@ -54,8 +49,17 @@ uint8_t main_menu() {
 		for(start = 0; start < MM_TILES_Y; start++) {
 			/* Roatating queue thing */
 			/* Shift the offset for smooth transitions */
-			for(offset = 0; offset < TILE_HEIGHT; offset++){
-				gfx_FillScreen(BACKGROUND_COLOR);
+			for(offset = 0; offset < TILE_HEIGHT; offset++) {
+
+				const uint8_t num_options = 5;
+
+				const char* mm_strings[] = {
+					"Resume",
+					"New Game",
+					"How to Play",
+					"Credits",
+					"Exit"
+				};
 
 				/* Do menu logic */
 
@@ -75,25 +79,58 @@ uint8_t main_menu() {
 				/* If a key is pressed, wait for it to release */
 				key_pressed = kb_Data[1] || kb_Data[6] || kb_Data[7];
 
-				/* Draw options text */
-				/* I could use for loops, but I wanted the first text to be bigger so it's not worth the time */
-				gfx_SetTextScale(3, 3);
-				if(selection == 0) gfx_SetTextFGColor(HIGHLIGHT_SIDE_COLOR);
-				else gfx_SetTextFGColor(WHITE);
-				gfx_PrintStringXY(str_play, (LCD_WIDTH - gfx_GetStringWidth(str_play)) / 2, (LCD_HEIGHT - 3 * TEXT_HEIGHT) / 2);
-				
+				gfx_FillScreen(BACKGROUND_COLOR);
 				gfx_SetTextScale(1, 1);
-				if(selection == 1) gfx_SetTextFGColor(HIGHLIGHT_SIDE_COLOR);
-				else gfx_SetTextFGColor(WHITE);
-				gfx_PrintStringXY(str_howto, (LCD_WIDTH - gfx_GetStringWidth(str_howto)) / 2, (LCD_HEIGHT + 3 * TEXT_HEIGHT) / 2 + 2 * TEXT_HEIGHT);
-				
-				if(selection == 2) gfx_SetTextFGColor(HIGHLIGHT_SIDE_COLOR);
-				else gfx_SetTextFGColor(WHITE);
-				gfx_PrintStringXY(str_credits, (LCD_WIDTH - gfx_GetStringWidth(str_credits)) / 2, (LCD_HEIGHT + 3 * TEXT_HEIGHT) / 2 + 4 * TEXT_HEIGHT);
-				
-				if(selection == 3) gfx_SetTextFGColor(HIGHLIGHT_SIDE_COLOR);
-				else gfx_SetTextFGColor(WHITE);
-				gfx_PrintStringXY(str_exit, (LCD_WIDTH - gfx_GetStringWidth(str_exit)) / 2, (LCD_HEIGHT + 3 * TEXT_HEIGHT) / 2 + 6 * TEXT_HEIGHT);
+
+				/* Draw options text */
+				for(i = 0; i < num_options; i++) {
+					if(selection == i) {
+						gfx_SetTextFGColor(HIGHLIGHT_SIDE_COLOR);
+					} else {
+						gfx_SetTextFGColor(WHITE);
+					}
+
+					gfx_PrintStringXY(mm_strings[i],
+						(LCD_WIDTH - gfx_GetStringWidth(mm_strings[i])) / 2,
+						(LCD_HEIGHT + 3 * TEXT_HEIGHT) / 2 + 2 * i * TEXT_HEIGHT);
+
+				}
+
+				gfx_SetTextScale(2, 2);
+				gfx_SetTextFGColor(BLACK);
+
+				/* Draw the tiles up top */
+				for(i = 6; i >= 0; i--) {
+					char *str = "Mahjong";
+					uint8_t j;
+					const uint8_t edge = 15;
+					const uint24_t use_area = LCD_WIDTH - 2 * (MM_SIDE_WIDTH + TILE_WIDTH) - 2 * edge;
+					uint24_t base_x = MM_SIDE_WIDTH + TILE_WIDTH + edge + 4 + i * ((use_area - 7 * 2 * TILE_WIDTH) / 6 + 2 * TILE_WIDTH);
+					uint24_t base_y = LCD_HEIGHT / 6;
+
+					/* Fill in the tile background */
+					gfx_SetColor(WHITE);
+					gfx_FillRectangle(base_x, base_y, 2 * TILE_WIDTH, 2 * TILE_HEIGHT);
+					
+					/* Draw letter */
+					gfx_SetTextXY(base_x + (TILE_WIDTH - gfx_GetCharWidth(str[i]) / 2), base_y + TILE_HEIGHT - TEXT_HEIGHT);
+					gfx_PrintChar(str[i]);
+
+					/* Draw the tile border. */
+					gfx_SetColor(SIDE_COLOR);
+					gfx_HorizLine(base_x, base_y, 2 * TILE_WIDTH);
+					gfx_VertLine(base_x + 2 * TILE_WIDTH - 1, base_y, 2 * TILE_HEIGHT - 1);
+					gfx_VertLine(base_x, base_y, 2 * TILE_HEIGHT - 1);
+
+					/* Display the left side of the tile */
+					for(j = 1; j <= 4; j++)
+						gfx_VertLine(base_x - j, base_y + j, 2 * TILE_HEIGHT - 1);
+
+					/* Display the bottom side of the tile */
+					gfx_SetColor(BOTTOM_COLOR);
+					for(j = 0; j < 6; j++)
+						gfx_HorizLine(base_x - j, base_y + 2 * TILE_HEIGHT - 1 + j, 2 * TILE_WIDTH);
+				}
 
 				/* Draw the tiles on the sides */
 				for(i = 0; i < MM_TILES_Y; i++) {
@@ -190,6 +227,7 @@ uint8_t layouts_menu() {
 
 		/* Input loop */
 		while(true) {
+			const char *str_hs = "high scores:";
 			int i;
 			uint8_t width;
 			/* Handle keypresses, yada yada. */
@@ -228,6 +266,8 @@ uint8_t layouts_menu() {
 				if(selection < 0) selection = meta.num_layouts - 1;
 				if(selection >= meta.num_layouts) selection = 0;
 			}
+
+
 
 			/* gooey */
 			gfx_FillScreen(BACKGROUND_COLOR);

@@ -36,6 +36,7 @@ void draw_infobar() {
 	/* Print the level name */
 	gfx_SetTextXY(LCD_WIDTH + 5, LCD_HEIGHT - INFOBAR_HEIGHT / 2 - 4);
 	gfx_SetTextFGColor(WHITE);
+	gfx_SetTextScale(1, 1);
 	gfx_PrintString(game.layout.name);
 
 	gfx_PrintString(" | ");

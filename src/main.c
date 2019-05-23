@@ -50,7 +50,7 @@ void main(void) {
 		/* Get which menu option was selected */
 		option = main_menu();
 		switch(option) {
-			case MM_PLAY:
+			case MM_RESUME:
 				/* If there is no recorded time, go to the level select for a new game */
 				if(!(timer = read_save()))
 					/* If the user doesn't select a layout, go back to main menu */
@@ -59,15 +59,22 @@ void main(void) {
 				reset_timer(timer);
 				play();
 				break;
-			case MM_EXIT:
-				cleanup();
-				return;
-			case MM_CREDITS:
-				credits();
+			case MM_NEW_GAME:
+				/* If the user doesn't select a layout, go back to main menu */
+				if(layouts_menu()) continue;
+				/* Reset timer to 0 */
+				reset_timer(0);
+				play();
 				break;
 			case MM_HOWTO:
 				how_to();
 				break;
+			case MM_CREDITS:
+				credits();
+				break;
+			case MM_EXIT:
+				cleanup();
+				return;
 		}
 	}
 }
