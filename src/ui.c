@@ -34,6 +34,8 @@ uint8_t main_menu() {
 	tile_t left[MM_TILES_Y];
 	tile_t right[MM_TILES_Y];
 
+	tile_t select_tile = randInt(1, TILE_TYPES);
+
 	/* Fill random tiles */
 	for(i = 0; i < MM_TILES_Y; i++) {
 		left[i] = randInt(1, TILE_TYPES);
@@ -84,16 +86,24 @@ uint8_t main_menu() {
 
 				/* Draw options text */
 				for(i = 0; i < num_options; i++) {
+					uint8_t width = gfx_GetStringWidth(mm_strings[i]);
+					uint8_t y = (LCD_HEIGHT + 3 * TEXT_HEIGHT) / 2 + 2 * i * TEXT_HEIGHT;
 					if(selection == i) {
+						#ifdef SELECTION_TILES
+						const uint8_t spacing = 10;
+						uint8_t tile_y = y + TEXT_HEIGHT / 2 - TILE_HEIGHT / 2;
+
+						/* Draw the tiles to the sides of the text */
+						render_raw_tile((LCD_WIDTH - width) / 2 - spacing - TILE_WIDTH, tile_y, select_tile, false);
+						render_raw_tile((LCD_WIDTH + width) / 2 + spacing, tile_y, select_tile, false);
+						#endif
+
 						gfx_SetTextFGColor(HIGHLIGHT_SIDE_COLOR);
 					} else {
 						gfx_SetTextFGColor(WHITE);
 					}
 
-					gfx_PrintStringXY(mm_strings[i],
-						(LCD_WIDTH - gfx_GetStringWidth(mm_strings[i])) / 2,
-						(LCD_HEIGHT + 3 * TEXT_HEIGHT) / 2 + 2 * i * TEXT_HEIGHT);
-
+					gfx_PrintStringXY(mm_strings[i], (LCD_WIDTH - width) / 2, y);
 				}
 
 				gfx_SetTextScale(2, 2);
@@ -106,7 +116,8 @@ uint8_t main_menu() {
 					const uint8_t edge = 15;
 					const uint24_t use_area = LCD_WIDTH - 2 * (MM_SIDE_WIDTH + TILE_WIDTH) - 2 * edge;
 					uint24_t base_x = MM_SIDE_WIDTH + TILE_WIDTH + edge + 4 + i * ((use_area - 7 * 2 * TILE_WIDTH) / 6 + 2 * TILE_WIDTH);
-					uint24_t base_y = LCD_HEIGHT / 6;
+					/* Makes a nice sine wave */
+					uint24_t base_y = LCD_HEIGHT / 6 + sin(2.0 * M_PI * (offset + ((6 - i) * TILE_HEIGHT / 7)) / TILE_HEIGHT) * 8;
 
 					/* Fill in the tile background */
 					gfx_SetColor(WHITE);
@@ -117,18 +128,19 @@ uint8_t main_menu() {
 					gfx_PrintChar(str[i]);
 
 					/* Draw the tile border. */
-					gfx_SetColor(SIDE_COLOR);
+					gfx_SetColor(BOTTOM_COLOR);
 					gfx_HorizLine(base_x, base_y, 2 * TILE_WIDTH);
 					gfx_VertLine(base_x + 2 * TILE_WIDTH - 1, base_y, 2 * TILE_HEIGHT - 1);
-					gfx_VertLine(base_x, base_y, 2 * TILE_HEIGHT - 1);
+
+					gfx_SetColor(SIDE_COLOR);
 
 					/* Display the left side of the tile */
-					for(j = 1; j <= 4; j++)
+					for(j = 0; j < 5; j++)
 						gfx_VertLine(base_x - j, base_y + j, 2 * TILE_HEIGHT - 1);
 
 					/* Display the bottom side of the tile */
 					gfx_SetColor(BOTTOM_COLOR);
-					for(j = 0; j < 6; j++)
+					for(j = 0; j < 5; j++)
 						gfx_HorizLine(base_x - j, base_y + 2 * TILE_HEIGHT - 1 + j, 2 * TILE_WIDTH);
 				}
 
@@ -461,7 +473,7 @@ void credits() {
 		"",
 		"Tileset inspired by GNOME Mahjongg",
 		"",
-		"Source: github.com/commandblockguy/mahjong-ce",
+		"Source: https://git.io/fjBGS",
 		"",
 		"",
 		"Thank you for playing."

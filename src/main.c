@@ -39,6 +39,7 @@ void main(void) {
 	/* Set up graphics, etc. */
 	gfx_Begin();
 	gfx_SetPalette(tiles_gfx_pal, sizeof_tiles_gfx_pal, 0);
+	gfx_FillScreen(BACKGROUND_COLOR);
 	gfx_SetDraw(gfx_buffer);
 
 	/* Set up the highscore appvar */
