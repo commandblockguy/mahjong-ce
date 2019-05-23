@@ -506,6 +506,8 @@ void how_to() {
 		"Controls:",
 		"Use the arrow keys to control the cursor",
 		"Press 2nd to select a tile",
+		"Press alpha / XT0n to undo / redo",
+		"Press stat to open / close the magnifier",
 		"Press clear to save and exit the game",
 		"Press del to exit without saving",
 		"Press mode to pause the game",
