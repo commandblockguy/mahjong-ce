@@ -1,5 +1,8 @@
 /bin/
 /obj/
+/release_tmp/
+/mahjong.zip
+/KYODAI.8xv
 /src/gfx/tilemap.c
 /src/gfx/tiles_gfx.c
 /src/gfx/tiles_gfx.h
