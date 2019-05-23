@@ -228,7 +228,9 @@ uint8_t layouts_menu() {
 		/* Input loop */
 		while(true) {
 			const char *str_hs = "high scores:";
+			const char *chars = "\0\0\0\0\0\0\0\0\0\0\0WRMH\0\0\0\0VQLG\0\0\0ZUPKFC\0\0YTOJEB\0\0XSNIDA\0\0\0\0\0\0\0\0";
 			int i;
+			uint8_t key;
 			uint8_t width;
 			/* Handle keypresses, yada yada. */
 			kb_Scan();
@@ -267,7 +269,28 @@ uint8_t layouts_menu() {
 				if(selection >= meta.num_layouts) selection = 0;
 			}
 
+			/* If a key is pressed, wait for it to release */
+			key_pressed = kb_Data[1] || kb_Data[6] || kb_Data[7];
 
+			if(!key_pressed) key_time = 0;
+			else if(key_time < 10) key_time++;
+
+			key = os_GetCSC();
+			if(chars[key]) {
+				char str[2] = {0};
+				*str = chars[key];
+
+				dbg_sprintf(dbgout, "key %u, %s\n", key, str);
+
+				/* Scroll to the correct letter */
+				/* Loop through each layout */
+				for(i = 0; i < meta.num_layouts; i++) {
+					if(strcmp(layouts[i].name, str) > 0) {
+						selection = i;
+						break;
+					}
+				}
+			}
 
 			/* gooey */
 			gfx_FillScreen(BACKGROUND_COLOR);
@@ -334,12 +357,6 @@ uint8_t layouts_menu() {
 			}
 
 			gfx_BlitBuffer();
-
-			/* If a key is pressed, wait for it to release */
-			key_pressed = kb_Data[1] || kb_Data[6] || kb_Data[7];
-
-			if(!key_pressed) key_time = 0;
-			else if(key_time < 10) key_time++;
 		}
 	}
 }
