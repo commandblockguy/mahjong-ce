@@ -32,18 +32,20 @@ release:
 	make clean
 	make clean_gfx
 
-	-rm -r release_tmp
-	mkdir release_tmp
-	cp -r importer README.md release_tmp
+	-rm -r mahjong
+	mkdir mahjong
+	cp -r importer README.md mahjong
 
-	mkdir release_tmp/source
-	cp -r src iconc.png makefile release_tmp/source
+	mkdir mahjong/source
+	cp -r src iconc.png makefile mahjong/source
 
 	make pack
-	cp KYODAI.8xv release_tmp
+	cp KYODAI.8xv mahjong
 
 	make gfx
 	make
-	cp bin/MAHJONG.8xp release_tmp
-	zip -r mahjong.zip release_tmp
-	rm -r release_tmp
+	cp bin/MAHJONG.8xp mahjong
+
+	-rm mahjong.zip
+	zip -r mahjong.zip mahjong
+	rm -r mahjong

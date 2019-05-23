@@ -12,14 +12,14 @@ You'll need [ti83f](https://bitbucket.org/keoni29/ti83f) and python 3.
 From the command line, run:
 ```
 python3 kyodai.py NAME file1.lay file2.lay file3.lay ...
-```  
+```
 which will produce an appvar called NAME.8xv containing all layouts with the correct number of tiles.
 
 ### Building from Source:
 Building from source is not necessary to run Mahjong - a pre-built copy (MAHJONG.8xp) is included.  
 You should only build from source if you want to modify the source code of the game.  
 You will need the [CE C toolchain](https://github.com/CE-Programming/toolchain/releases).  
-From the command line, `cd` to the `source` directory and run
+From the command line, `cd` to the directory containing `src` and run
 ```
 make gfx
 make
