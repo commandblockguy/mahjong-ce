@@ -158,6 +158,9 @@ uint8_t calc_num_moves() {
 		for(y = 0; y < TILES_Y; y++) {
 			for(x = 0; x < TILES_X; x++) {
 				tile_t type = get_type(x, y, z);
+				/* Don't count non tiles */
+				/* Fun fact, the absence of this line caused a crash for almost a year */
+				if(!type) continue;
 				game.tile_count[type - 1]++;
 				if(is_removable(x, y, z))
 					num_removable[type - 1]++;

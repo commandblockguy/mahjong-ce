@@ -203,7 +203,12 @@ void play() {
 					/* Restart level */
 
 					/* Copy the backup of tiles into game.tiles */
-					memcpy(game.tiles, game.initial_tiles, TILES_X * TILES_Y * TILES_Z * sizeof(tile_t));
+					memcpy(game.tiles, game.initial_tiles, sizeof(game.tiles));
+
+					game.remaining_tiles = TILE_TYPES * 4;
+					game.status = IN_PROGRESS;
+					game.undos = 0;
+					game.redos = 0;
 
 					/* Start the timer over */
 					reset_timer(0);
