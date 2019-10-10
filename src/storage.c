@@ -213,6 +213,7 @@ uint24_t read_save(void) {
 		/* If so, read the level and pack names */
 		ti_Read(game.pack_name, sizeof(char), 9, var);
 		ti_Read(game.layout.name, sizeof(char), NAME_LENGTH, var);
+		ti_Close(var);
 		return 0;
 	} else {
 		uint24_t timer;
@@ -221,6 +222,7 @@ uint24_t read_save(void) {
 		ti_Read(&game, sizeof(game_t), 1, var);
 		/* Return the timer value */
 		ti_Read(&timer, sizeof(uint24_t), 1, var);
+		ti_Close(var);
 		return timer;
 	}
 }

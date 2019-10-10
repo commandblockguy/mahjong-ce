@@ -192,7 +192,7 @@ uint8_t layouts_menu() {
 		ti_Read(&meta, sizeof(pack_meta_t), 1, var);
 
 		/* If no layouts found */
-		if(!meta.version > 1) {
+		if(meta.version > 1) {
 			const char *str_version = "Unsupported pack version.";
 
 			gfx_FillScreen(BACKGROUND_COLOR);
@@ -467,6 +467,7 @@ void credits() {
 		"Made by commandblockguy",
 		"",
 		"Avaliable on Cemetech.net",
+		"https://discord.gg/DZbmraw",
 		"",
 		"Thanks to MateoC for creating the C toolchain",
 		"and putting up with my stupidity.",
@@ -670,9 +671,6 @@ uint8_t lose_popup(void) {
 		key_pressed = kb_Data[1] || kb_Data[6] || kb_Data[7];
 	
 		for(i = 0; i < 3; i++) {
-			uint24_t time = get_hs(game.layout.name, i);
-			uint24_t minutes;
-	
 			gfx_SetTextFGColor(i == selection ? HIGHLIGHT_SIDE_COLOR : WHITE);
 			gfx_PrintStringXY(strs[i], LCD_WIDTH / 3 + 4, LCD_HEIGHT / 4 + 16 + 3 * TEXT_HEIGHT + 20 * i);
 		}
