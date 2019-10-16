@@ -39,7 +39,7 @@ uint8_t occurrences(char *str, char delim) {
 }
 
 /* Get the value of Ans */
-int get_ans() {
+int get_ans(void) {
     real_t *real_in;
     int in;
 

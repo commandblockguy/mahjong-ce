@@ -1,10 +1,12 @@
 #ifndef H_GFX
 #define H_GFX
 
+/* Dimensions of the face of a tile in pixels */
 #define TILE_WIDTH  14
 #define TILE_HEIGHT 21
-//Isometric perspective stuff
+/* Width in pixels of the left edge of a tile when applying isometric effects */
 #define SHIFT_X 2
+/* Height in pixels of the bottom edge of a tile when applying isometric effects */
 #define SHIFT_Y 2
 
 /* Colors */
@@ -22,10 +24,13 @@
 #define INFOBAR_HEIGHT 12
 #define STOPWATCH_WIDTH 64
 
+/* Speed of the cursor in pixels/loop */
 #define CURSOR_SPEED 2
 
+/* Size of the region around the cursor used by the magnifier, prior to magnification */
 #define MAGNIFIER_X 32
 #define MAGNIFIER_Y 32
+/* Scaling factor the magnifier should use */
 #define MAGNIFIER_SCALE 3
 
 #define TEXT_HEIGHT 8

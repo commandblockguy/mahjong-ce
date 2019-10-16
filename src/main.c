@@ -88,26 +88,12 @@ void main(void) {
 	}
 }
 
-void cleanup() {
+void cleanup(void) {
 	/* Cleanup */
 	gfx_End();
 }
 
-/* temp export func
-	ti_var_t var;
-	pack_meta_t meta = {"MJ", 1, 1};
-
-	ti_CloseAll();
-
-	var = ti_Open("MJPack", "w+");
-
-	ti_Write(&meta, sizeof(pack_meta_t), 1, var);
-	ti_Write(&easy, sizeof(layout_t), 1, var);
-
-	ti_CloseAll();
-*/
-
-void play() {
+void play(void) {
 	/* Position for the on-screen pointer */
 	uint24_t cursor_x = LCD_WIDTH / 2;
 	uint8_t cursor_y = LCD_HEIGHT / 2;

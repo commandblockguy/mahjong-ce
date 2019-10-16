@@ -27,12 +27,14 @@
 /* One pixel padding, plus one pixel thick line */
 #define BUTTON_HEIGHT TEXT_HEIGHT + 4
 
+/* Number of tiles in the columns on the side of the screen */
 #define MM_TILES_Y ((LCD_HEIGHT / TILE_HEIGHT) + 2)
+/* Distance between the edges of the screen and the outside edges of the columns */
 #define MM_SIDE_WIDTH 25
 
 #define PACKS_MENU_LINES 30
 
-uint8_t main_menu() {
+uint8_t main_menu(void) {
 	int selection = 0, i, start, offset;
 	bool key_pressed = true;
 
@@ -168,7 +170,7 @@ uint8_t main_menu() {
 
 /* Returns a status code */
 /* 0 if successful, 1 if user hit clear */
-uint8_t layouts_menu() {
+uint8_t layouts_menu(void) {
 
 	if(strcmp(game.pack_name, "") == 0) {
 		/* No pack selected in save file */
@@ -466,7 +468,7 @@ void packs_menu(void) {
 	}
 }
 
-void credits() {
+void credits(void) {
 	int i = 0;
 	const char *lines[] = {
 		"Made by commandblockguy",
@@ -506,7 +508,7 @@ void credits() {
 	while(!(kb_Data[1] || kb_Data[6] || kb_Data[7])) kb_Scan();
 }
 
-void how_to() {
+void how_to(void) {
 	int i = 0;
 	const char *lines[] = {
 		"Controls:",
@@ -547,7 +549,7 @@ void how_to() {
 	while(!(kb_Data[1] || kb_Data[6] || kb_Data[7])) kb_Scan();
 }
 
-void pause() {
+void pause(void) {
 	const char *text = "game paused";
 
 	/* Wait for the user to stop pressing mode */

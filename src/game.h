@@ -16,14 +16,15 @@
 #include "tile.h"
 
 enum game_status {
-	IN_PROGRESS,
-	WIN,
-	LOSE,
-	EXIT,
-	EXIT_NO_SAVE
+	IN_PROGRESS,	/* Game is in progress */
+	WIN,			/* No tiles left */
+	LOSE,			/* No moves left */
+	EXIT,			/* Game should save and return to the main menu */
+	EXIT_NO_SAVE	/* Game should return to the main menu without saving */
 };
 
 typedef struct {
+	/* Uses the enum game_status but is only 1 byte */
 	uint8_t status;
 	/* x, y, z(layers) */
 	tile_t tiles[TILES_X][TILES_Y][TILES_Z];
@@ -40,12 +41,16 @@ typedef struct {
 	/* Pointer to the currently loaded layout */
 	/* Is set in the load_layout function */
 	layout_t layout;
+	/* Number of tiles left */
 	uint8_t remaining_tiles;
+	/* The last calculated value of the number of possible moves */
 	uint8_t possible_moves;
 	bool magnifier_shown;
+	/* The name of the current pack */
 	char pack_name[9];
 } game_t;
 
+/* Game global defined in main.c */
 extern game_t game;
 
 #endif

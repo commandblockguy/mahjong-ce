@@ -22,7 +22,7 @@
 #include "tile.h"
 #include "util.h"
 
-
+/* Re-render the entire screen */
 void rerender(void) {
 	dbg_sprintf(dbgout, "redrawing\n");
 	gfx_FillScreen(BACKGROUND_COLOR);
@@ -48,6 +48,8 @@ void draw_infobar(void) {
 	/* Number of tiles left */
 	gfx_PrintUInt(game.remaining_tiles, num_digits(game.remaining_tiles));
 	gfx_PrintString("/144 left | "); /* Not sure how to do this in a less lazy way, using defines */
+	/* You can stringify things in the C preprocessor, and multiply things */
+	/* However I don't think it's possible to stringify the result of a multiplication */
 
 	/* Number of moves left */
 	gfx_PrintUInt(game.possible_moves, num_digits(game.possible_moves));
@@ -97,6 +99,7 @@ void render_tile(uint8_t x, uint8_t y, uint8_t z, bool highlight) {
 
 }
 
+/* Render a particular tile type at a particular location in screen space */
 void render_raw_tile(int24_t base_x, int24_t base_y, uint8_t type, bool highlight) {
 	/* Display the face sprite */
 	if(highlight) {
@@ -147,6 +150,7 @@ void draw_cursor(uint24_t x, uint8_t y) {
 
 }
 
+/* Draw the stopwatch in the bottom of the screen */
 void render_stopwatch(void) {
 	/* Draw the stopwatch */
 	uint24_t ms = atomic_load_increasing_32(&timer_1_Counter) / 33;
@@ -179,6 +183,7 @@ uint8_t tile_base_y(uint8_t x, uint8_t y, uint8_t z) {
 	return game.layout.start_y + (y * TILE_HEIGHT) - SHIFT_Y * z - (is_offset_up(x, y, z) ? TILE_HEIGHT / 2 : 0);
 }
 
+/* Draw the magnifier in the bottom right of the screen */
 void draw_magnifier(uint24_t csr_x, uint8_t csr_y) {
 	uint24_t x = LCD_WIDTH  - MAGNIFIER_X * MAGNIFIER_SCALE;
 	uint24_t y = LCD_HEIGHT - MAGNIFIER_Y * MAGNIFIER_SCALE - INFOBAR_HEIGHT;
@@ -217,6 +222,7 @@ void draw_magnifier(uint24_t csr_x, uint8_t csr_y) {
 		MAGNIFIER_SCALE, MAGNIFIER_SCALE);
 }
 
+/* Display the number of tiles with the same type as teh one under the cursor */
 void render_tile_info(tile_t tile) {
 	/* Erase the previous stuff */
 	gfx_SetColor(BACKGROUND_COLOR);

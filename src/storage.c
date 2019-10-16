@@ -22,6 +22,7 @@
 const char *hs_appvar = "MJHigh";
 const char *save_appvar = "MJSave";
 
+/* Set up the high scores appvar if it does not exist */
 void init_hs_appvar(void) {
 	ti_var_t appvar;
 
@@ -45,6 +46,7 @@ void init_hs_appvar(void) {
 	ti_PutC(0, appvar);
 }
 
+/* Add a high score to the list */
 /* Time in timer units, name of layout */
 void add_hs(uint24_t time, char* name) {
 	ti_var_t appvar;
@@ -188,6 +190,7 @@ void save_game(uint24_t timer) {
 	ti_CloseAll();
 }
 
+/* Reads and loads a save */
 /* Returns time in ms if the save appvar has a game in progress */
 uint24_t read_save(void) {
 	ti_var_t var;

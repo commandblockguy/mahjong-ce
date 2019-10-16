@@ -18,6 +18,7 @@
 #include "tile.h"
 #include "util.h"
 
+/* Check if the tile at (x,y,z) can be removed */
 bool is_removable(uint8_t x, uint8_t y, uint8_t z) {
 
 	/* Fail if the tile has already been removed */
@@ -30,6 +31,7 @@ bool is_removable(uint8_t x, uint8_t y, uint8_t z) {
 	return true;
 }
 
+/* Check if the right side of a tile is blocked */
 bool right_blocked(uint8_t x, uint8_t y, uint8_t z) {
 	/* Handle differently depending on whether or not this tile is offset */
 	switch(game.tiles[x][y][z] & (bmRightOffset | bmTopOffset)) {
@@ -53,6 +55,7 @@ bool right_blocked(uint8_t x, uint8_t y, uint8_t z) {
 	return false;
 }
 
+/* Check if the left side of a tile is blocked */
 bool left_blocked(uint8_t x, uint8_t y, uint8_t z) {
 	/* Handle differently depending on whether or not this tile is offset */
 	switch(game.tiles[x][y][z] & (bmRightOffset | bmTopOffset)) {
@@ -76,6 +79,7 @@ bool left_blocked(uint8_t x, uint8_t y, uint8_t z) {
 	return false;
 }
 
+/* Check if a tile is blocked from above */
 bool top_blocked(uint8_t x, uint8_t y, uint8_t z) {
 
 	if(get_type(x, y, z + 1)) return true;
@@ -106,7 +110,7 @@ bool top_blocked(uint8_t x, uint8_t y, uint8_t z) {
 	return false;
 }
 
-/* Returns true if successful */
+/* Returns true if tiles were removed successfully */
 bool remove_tiles(uint8_t x1, uint8_t y1,  uint8_t z1, uint8_t x2, uint8_t y2, uint8_t z2) {
 	undo_t *undo;
 	/* Check if tiles are the same */
@@ -151,7 +155,7 @@ bool remove_tiles(uint8_t x1, uint8_t y1,  uint8_t z1, uint8_t x2, uint8_t y2, u
 }
 
 /* Calcuate the number of possible moves */
-uint8_t calc_num_moves() {
+uint8_t calc_num_moves(void) {
 	uint8_t num_removable[TILE_TYPES] = {0};
 	uint8_t x, y, z, i, moves = 0;
 
@@ -193,6 +197,7 @@ uint8_t calc_num_moves() {
 	return game.possible_moves = moves;
 }
 
+/* Get the position of the tile under the cursor, if any */
 pos_t find_highlight(uint24_t cursor_x, uint8_t cursor_y) {
 	pos_t ret = {-1, -1, -1};
 	int z_level;
@@ -243,6 +248,7 @@ pos_t find_highlight(uint24_t cursor_x, uint8_t cursor_y) {
 	return ret;
 }
 
+/* Load a layout and randomize tiles */
 void load_layout(layout_t *l, bool random) {
 	int i;
 
@@ -310,6 +316,7 @@ void load_layout(layout_t *l, bool random) {
 }
 
 /* I guess this can go here. */
+/* Why is this even a function? */
 void set_highlight(int8_t x, int8_t y, int8_t z) {
 	game.highlight.x = x;
 	game.highlight.y = y;
@@ -323,6 +330,7 @@ void reset_timer(uint24_t ms) {
 	timer_Control = TIMER1_ENABLE | TIMER1_32K | TIMER1_UP;
 }
 
+/* Undo a move, returning true if successful */
 bool undo(void) {
 	undo_t *data;
 
@@ -344,6 +352,7 @@ bool undo(void) {
 	return true;
 }
 
+/* Redo a move, returning true if successful */
 bool redo(void) {
 	undo_t *data;
 
