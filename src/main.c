@@ -24,10 +24,18 @@
 #include <debug.h>
 
 #include "game.h"
+#include "gfx.h"
 #include "gfx/tiles_gfx.h"
+#include "logic.h"
+#include "storage.h"
+#include "tile.h"
 #include "layouts.h"
+#include "ui.h"
 
 game_t game;
+
+void play(void);
+void cleanup(void);
 
 void main(void) {
 	int option;

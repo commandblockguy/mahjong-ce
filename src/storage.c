@@ -12,18 +12,15 @@
 #include <keypadc.h>
 #include <fileioc.h>
 
+#include <debug.h>
+
 #include "game.h"
+#include "storage.h"
 #include "layouts.h"
 
-#include <debug.h>
 
 const char *hs_appvar = "MJHigh";
 const char *save_appvar = "MJSave";
-
-typedef struct {
-	char name[NAME_LENGTH];
-	uint24_t times[SCORES];
-} score_entry_t;
 
 void init_hs_appvar(void) {
 	ti_var_t appvar;

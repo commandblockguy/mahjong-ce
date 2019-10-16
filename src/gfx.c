@@ -15,12 +15,15 @@
 #include <debug.h>
 
 #include "game.h"
+#include "gfx.h"
 #include "gfx/tiles_gfx.h"
 #include "gfx/gfx_group.h"
 #include "layouts.h"
+#include "tile.h"
+#include "util.h"
 
 
-void rerender() {
+void rerender(void) {
 	dbg_sprintf(dbgout, "redrawing\n");
 	gfx_FillScreen(BACKGROUND_COLOR);
 	render_tiles();
@@ -29,7 +32,7 @@ void rerender() {
 
 
 /* Draw the infobar */
-void draw_infobar() {
+void draw_infobar(void) {
 
 	gfx_SetColor(INFOBAR_COLOR);
 	gfx_FillRectangle(0, LCD_HEIGHT - INFOBAR_HEIGHT, LCD_WIDTH, INFOBAR_HEIGHT);
@@ -52,7 +55,7 @@ void draw_infobar() {
 }
 
 /* Draw the tile grid */
-void render_tiles() {
+void render_tiles(void) {
 	int x, y, z;
 	for(z = 0; z < TILES_Z; z++) {
 		for(y = 0; y < TILES_Y; y++) {

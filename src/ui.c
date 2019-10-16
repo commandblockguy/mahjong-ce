@@ -17,7 +17,12 @@
 #include <debug.h>
 
 #include "game.h"
+#include "gfx.h"
+#include "logic.h"
+#include "storage.h"
 #include "gfx/tiles_gfx.h"
+#include "ui.h"
+#include "util.h"
 
 /* One pixel padding, plus one pixel thick line */
 #define BUTTON_HEIGHT TEXT_HEIGHT + 4
@@ -374,7 +379,7 @@ uint8_t layouts_menu() {
 }
 
 /* Returns the name of the selected pack */
-void packs_menu() {
+void packs_menu(void) {
 	char names[PACKS_MENU_LINES][9];
 	uint8_t num_names;
 	int selection = 0;
@@ -540,10 +545,6 @@ void how_to() {
 
 	while(kb_Data[1]) kb_Scan();
 	while(!(kb_Data[1] || kb_Data[6] || kb_Data[7])) kb_Scan();
-}
-
-void how_to_page(uint8_t page) {
-
 }
 
 void pause() {

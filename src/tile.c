@@ -13,6 +13,7 @@
 #include <fileioc.h>
 
 #include "game.h"
+#include "tile.h"
 
 uint8_t get_type(uint8_t x, uint8_t y, uint8_t z) {
 	/* Check if position is valid */

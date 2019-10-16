@@ -13,6 +13,10 @@
 #include <fileioc.h>
 
 #include "game.h"
+#include "gfx.h"
+#include "logic.h"
+#include "tile.h"
+#include "util.h"
 
 bool is_removable(uint8_t x, uint8_t y, uint8_t z) {
 

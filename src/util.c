@@ -29,27 +29,6 @@ void shuffle(uint8_t * array, uint24_t size) {
     }
 }
 
-/* Prints a hex representation of the appvar to the console */
-void debug_appvar(char *name) {
-    int i, j, size;
-    ti_var_t appvar;
-
-    ti_CloseAll();
-
-    appvar = ti_Open(name, "r");
-    size = ti_GetSize(appvar);
-
-    for(i = 0; i < size;) {
-        uint8_t data[8];
-        int transferred = ti_Read(&data, sizeof(uint8_t), 8, appvar);
-        for(j = 0; j < transferred; j++) {
-            dbg_sprintf(dbgout, "%02X ", data[j]);
-        }
-        dbg_sprintf(dbgout, "\n");
-        i += transferred;
-    }
-}
-
 /* Count the number of occurences of delim in str */
 uint8_t occurrences(char *str, char delim) {
     int val = 0, i;
