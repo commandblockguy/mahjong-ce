@@ -19,12 +19,14 @@
 #include "layouts.h"
 
 
-const char *hs_appvar = "MJHigh";
+const char *hs_appvar = "MJScores";
+const char *hs_legacy_appvar = "MJHigh";
 const char *save_appvar = "MJSave";
 
 /* Set up the high scores appvar if it does not exist */
 void init_hs_appvar(void) {
-	ti_var_t appvar;
+	ti_var_t appvar, legacy_var;
+	score_header_t header;
 
 	/* Reasons??? */
 	ti_CloseAll();
@@ -33,8 +35,48 @@ void init_hs_appvar(void) {
 	appvar = ti_Open(hs_appvar, "r");
 
 	if(appvar) {
-		/* File exists. No action must be taken. */
-		ti_CloseAll();
+		/* If appvar exists, we are good to go */
+		ti_Close(appvar);
+
+		return;
+	}
+
+	/* Try to open legacy score appvar */
+	legacy_var = ti_Open(hs_legacy_appvar, "r");
+	if(legacy_var) {
+		uint24_t i;
+		uint8_t num_layouts;
+		score_entry_t scores;
+		appvar = ti_Open(hs_appvar, "w");
+
+		/* Get the number of layouts */
+		num_layouts = ti_GetC(legacy_var);
+
+		dbg_sprintf(dbgout, "found a legacy appvar with %u layouts\n", num_layouts);
+
+		/* Write the header for the new appvar */
+		header.num_layouts = num_layouts;
+		header.version = CURRENT_HS_VERSION;
+
+		ti_Write(&header, sizeof(header), 1, appvar);
+
+		memset(&scores.players, 0, sizeof(scores.players));
+
+		/* Copy each layout's scores over */
+		for(i = 0; i < num_layouts; i++) {
+			uint8_t rank;
+
+			/* Copy the old scores into the new score struct */
+			ti_Read(&scores, sizeof(legacy_score_entry_t), 1, legacy_var);
+
+			/* Write the new scores */
+			ti_Write(&scores, sizeof(score_entry_t), 1, appvar);
+		}
+
+		/* Delete the old var */
+		ti_Close(legacy_var);
+		ti_Delete(hs_legacy_appvar);
+		ti_Close(appvar);
 
 		return;
 	}
@@ -43,41 +85,55 @@ void init_hs_appvar(void) {
 	appvar = ti_Open(hs_appvar, "w");
 
 	/* Write a 0 (the number of high scores) */
-	ti_PutC(0, appvar);
+	header.num_layouts = 0;
+	header.version = CURRENT_HS_VERSION;
+	ti_Write(&header, sizeof(header), 1, appvar);
+	ti_Close(appvar);
 }
 
 /* Add a high score to the list */
 /* Time in timer units, name of layout */
-void add_hs(uint24_t time, char* name) {
+void add_hs(uint24_t time, char* name, char* player) {
 	ti_var_t appvar;
 	uint8_t num_layouts, i;
 	score_entry_t scores;
+	score_header_t header;
 
 	ti_CloseAll();
 
 	/* Open the highscore appvar */
 	appvar = ti_Open(hs_appvar, "r+");
 
-	/* Get the number of layouts with highscores */
-	num_layouts = ti_GetC(appvar);
+	/* Get the header */
+	ti_Read(&header, sizeof(header), 1, appvar);
+
+	/* Return if an unsupported version */
+	if(header.version != CURRENT_HS_VERSION) {
+		return;
+	}
 
 	/* Loop through all the high scores */
-	for(i = 0; i < num_layouts; i++) {
+	for(i = 0; i < header.num_layouts; i++) {
 		ti_Read(&scores, sizeof(score_entry_t), 1, appvar);
 		if(strcmp(scores.name, name) == 0) {
-			int rank;
+			uint8_t rank;
 			/* Strings are the same */
 
 			/* Rewind the appvar */
 			ti_Seek(-sizeof(score_entry_t), SEEK_CUR, appvar);
 
 			/* Sort the time into the times */
-			for(rank = SCORES - 1; (rank >= 0  && scores.times[rank] > time); rank--) {
-				if(rank < SCORES) scores.times[rank + 1] = scores.times[rank]; 
+			for(rank = SCORES - 1; rank >= 0  && scores.times[rank] > time; rank--) {
+				if(rank + 1 < SCORES) {
+					scores.times[rank + 1] = scores.times[rank];
+					memcpy(scores.players[rank + 1], scores.players[rank], sizeof(scores.players[0]));
+				}
 			}
 
-			if(rank + 1 < SCORES)
+			if(rank + 1 < SCORES) {
 				scores.times[rank + 1] = time;
+				memcpy(scores.players[rank + 1], player, sizeof(scores.players[0]));
+			}
 
 			ti_Write(&scores, sizeof(score_entry_t), 1, appvar);
 
@@ -91,45 +147,63 @@ void add_hs(uint24_t time, char* name) {
 
 	/* No high scores were found with that name, make a new entry */
 
+	dbg_sprintf(dbgout, "Creating new entry\n");
+
 	/* Add one to the number of entries */
 	ti_Rewind(appvar);
-	i = ti_GetC(appvar);
-	i++;
-	ti_Rewind(appvar);
-	ti_PutC(i, appvar);
+	header.num_layouts++;
+	ti_Write(&header, sizeof(header), 1, appvar);
 
-	/* Initialize usused times to -1 ms */
 	strcpy(scores.name, name);
 	scores.times[0] = time;
-	for(i = 1; i < SCORES; i++)
+	strcpy(scores.players[0], player);
+
+	/* Initialize usused times to -1 ms */
+	for(i = 1; i < SCORES; i++) {
 		scores.times[i] = -1;
+	}
 
 	/* Add the scores the end of the appvar */
 	ti_Seek(0, SEEK_END, appvar);
 	ti_Write(&scores, sizeof(score_entry_t), 1, appvar);
 
+	ti_Close(appvar);
+
 }
 
 /* Rank is number of scores with a lower time */
 /* eg. best time is 0, worst is 7 */
-uint24_t get_hs(char* name, uint8_t rank) {
+/* Player name is copied into player */
+uint24_t get_hs(char* name, uint8_t rank, char *player) {
 	ti_var_t appvar;
 	uint8_t num_layouts, i;
 	score_entry_t scores;
+	score_header_t header;
 
 	ti_CloseAll();
 
 	/* Open the highscore appvar */
 	appvar = ti_Open(hs_appvar, "r");
 
-	/* Get the number of layouts with highscores */
-	num_layouts = ti_GetC(appvar);
+	/* Get the header */
+	ti_Read(&header, sizeof(header), 1, appvar);
 
-	for(i = 0; i < num_layouts; i++) {
+	/* Return if an unsupported version */
+	if(header.version != CURRENT_HS_VERSION) {
+		*player = 0;
+		return -1;
+	}
+
+	for(i = 0; i < header.num_layouts; i++) {
 		ti_Read(&scores, sizeof(score_entry_t), 1, appvar);
 		if(strcmp(scores.name, name) == 0) {
 			/* Strings are the same */
 			ti_CloseAll();
+
+			/* Copy the player name */
+			if(player) {
+				memcpy(player, scores.players[rank], sizeof(scores.players[rank]));
+			}
 			return scores.times[rank];
 		}
 	}

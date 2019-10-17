@@ -353,8 +353,12 @@ uint8_t layouts_menu(void) {
 
 			/* Actual high scores */
 			for(i = 0; i < SCORES; i++) {
-				uint24_t time = get_hs(&layouts[selection].name, i);
+				char playername[PLAYER_NAME_LENGTH];
+				uint24_t time;
 				uint24_t minutes;
+				uint8_t name_width;
+
+				time = get_hs(&layouts[selection].name, i, playername);
 
 				gfx_SetTextXY(LCD_WIDTH / 2 + 8, LCD_HEIGHT / 2 + 16 + 12 * i);
 
@@ -365,14 +369,24 @@ uint8_t layouts_menu(void) {
 					continue;
 				}
 
-				minutes = time / 60000;
+				if(time >> 16 == 0xFF) {
+					/* Value is a number of tiles remaining */
+					gfx_PrintUInt(time & 0xFF, num_digits(time & 0xFF));
+					gfx_PrintString(" left");
+				} else {
 
-				/* Print the actual values */
-				gfx_PrintUInt(minutes, num_digits(minutes));
-				gfx_PrintString(":");
-				gfx_PrintUInt((time / 1000) % 60, 2);
-				gfx_PrintString(".");
-				gfx_PrintUInt(time % 1000, 3);
+					minutes = time / 60000;
+
+					/* Print the actual values */
+					gfx_PrintUInt(minutes, num_digits(minutes));
+					gfx_PrintString(":");
+					gfx_PrintUInt((time / 1000) % 60, 2);
+					gfx_PrintString(".");
+					gfx_PrintUInt(time % 1000, 3);
+				}
+
+				name_width = gfx_GetStringWidth(playername);
+				gfx_PrintStringXY(playername, LCD_WIDTH - name_width - 2, gfx_GetTextY());
 			}
 
 			gfx_BlitBuffer();
@@ -604,7 +618,8 @@ void win_popup(void) {
 
 	/* High score display */
 	for(i = 0; i < SCORES; i++) {
-		uint24_t time = get_hs(game.layout.name, i);
+		char playername[PLAYER_NAME_LENGTH];
+		uint24_t time = get_hs(game.layout.name, i, playername);
 		uint24_t minutes;
 
 		gfx_SetTextXY(LCD_WIDTH / 3 + 4, LCD_HEIGHT / 4 + 8 + 3 * TEXT_HEIGHT + 10 * i);
@@ -617,6 +632,7 @@ void win_popup(void) {
 			continue;
 		}
 
+		/* Value is a time */
 		minutes = time / 60000;
 
 		/* Print the actual values */

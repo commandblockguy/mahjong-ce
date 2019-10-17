@@ -217,6 +217,10 @@ void play(void) {
 						rerender();
 					}
 					break;
+				case 2:
+					/* Exit */
+					add_hs(0xFF0000 | game.remaining_tiles, game.layout.name, "Test\0\0\0\0");
+					break;
 			}
 		}
 	}
@@ -225,7 +229,7 @@ void play(void) {
 	if(game.status == WIN) {
 		/* Disable the timer, so we can reference it later */
 		timer_Control = TIMER1_DISABLE;
-		add_hs(timer_1_Counter / 33, game.layout.name);
+		add_hs(timer_1_Counter / 33, game.layout.name, "Test\0\0\0\0");
 		set_last_level(game.pack_name, game.layout.name);
 		win_popup();
 	}
