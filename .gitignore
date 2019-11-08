@@ -7,3 +7,7 @@
 /src/gfx/*.h
 /src/gfx/palette
 /src/gfx/convpng.log
+
+/cmake-build-debug/
+/venv/
+/.idea/

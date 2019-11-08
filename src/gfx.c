@@ -1,16 +1,10 @@
 #include <stdbool.h>
-#include <stddef.h>
 #include <stdint.h>
 #include <tice.h>
 
-#include <math.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 #include <graphx.h>
-#include <keypadc.h>
-#include <fileioc.h>
 
 #include <debug.h>
 
@@ -18,7 +12,6 @@
 #include "gfx.h"
 #include "gfx/tiles_gfx.h"
 #include "gfx/gfx_group.h"
-#include "layouts.h"
 #include "tile.h"
 #include "util.h"
 

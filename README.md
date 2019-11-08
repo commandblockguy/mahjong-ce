@@ -1,6 +1,6 @@
 # Mahjong Solitaire
 
-Requires the latest [CE C libraries](tiny.cc/clibs)
+Requires the latest [CE C libraries](https://tiny.cc/clibs)
 
 To install, you will need TI-Connect CE or TILP.  
 Transfer the C libraries, MAHJONG.8xp, and KYODAI.8xv

@@ -1,14 +1,11 @@
 #include <stdbool.h>
-#include <stddef.h>
 #include <stdint.h>
 #include <tice.h>
 
 #include <math.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
-#include <stdarg.h>
 
 #include <graphx.h>
 #include <keypadc.h>
@@ -20,12 +17,11 @@
 #include "gfx.h"
 #include "logic.h"
 #include "storage.h"
-#include "gfx/tiles_gfx.h"
 #include "ui.h"
 #include "util.h"
 
 /* One pixel padding, plus one pixel thick line */
-#define BUTTON_HEIGHT TEXT_HEIGHT + 4
+#define BUTTON_HEIGHT (TEXT_HEIGHT + 4)
 
 /* Number of tiles in the columns on the side of the screen */
 #define MM_TILES_Y ((LCD_HEIGHT / TILE_HEIGHT) + 2)
@@ -34,6 +30,8 @@
 
 #define PACKS_MENU_LINES 30
 
+const char getkey_letters[] = "\0\0\0\0\0\0\0\0\0\0\0WRMH\0\0\0\0VQLG\0\0\0ZUPKFC\0\0YTOJEB\0\0XSNIDA\0\0\0\0\0\0\0\0";
+
 uint8_t main_menu(void) {
 	int selection = 0, i, start, offset;
 	bool key_pressed = true;
@@ -41,9 +39,7 @@ uint8_t main_menu(void) {
 	tile_t left[MM_TILES_Y];
 	tile_t right[MM_TILES_Y];
 
-	tile_t select_tile = randInt(1, TILE_TYPES);
-
-	/* Fill random tiles */
+    /* Fill random tiles */
 	for(i = 0; i < MM_TILES_Y; i++) {
 		left[i] = randInt(1, TILE_TYPES);
 		right[i] = randInt(1, TILE_TYPES);
@@ -56,7 +52,7 @@ uint8_t main_menu(void) {
 
 		/* Stuff for tiles on the sides */
 		for(start = 0; start < MM_TILES_Y; start++) {
-			/* Roatating queue thing */
+			/* Rotating queue thing */
 			/* Shift the offset for smooth transitions */
 			for(offset = 0; offset < TILE_HEIGHT; offset++) {
 
@@ -124,7 +120,7 @@ uint8_t main_menu(void) {
 					const uint24_t use_area = LCD_WIDTH - 2 * (MM_SIDE_WIDTH + TILE_WIDTH) - 2 * edge;
 					uint24_t base_x = MM_SIDE_WIDTH + TILE_WIDTH + edge + 4 + i * ((use_area - 7 * 2 * TILE_WIDTH) / 6 + 2 * TILE_WIDTH);
 					/* Makes a nice sine wave */
-					uint24_t base_y = LCD_HEIGHT / 6 + sin(2.0 * M_PI * (offset + ((6 - i) * TILE_HEIGHT / 7)) / TILE_HEIGHT) * 8;
+					uint24_t base_y = (float)LCD_HEIGHT / 6 + sin(2.0 * M_PI * (offset + ((float)(6 - i) * TILE_HEIGHT / 7)) / TILE_HEIGHT) * 8;
 
 					/* Fill in the tile background */
 					gfx_SetColor(WHITE);
@@ -247,8 +243,7 @@ uint8_t layouts_menu(void) {
 		/* Input loop */
 		while(true) {
 			const char *str_hs = "high scores:";
-			const char *chars = "\0\0\0\0\0\0\0\0\0\0\0WRMH\0\0\0\0VQLG\0\0\0ZUPKFC\0\0YTOJEB\0\0XSNIDA\0\0\0\0\0\0\0\0";
-			int i;
+			uint24_t i;
 			uint8_t key;
 			uint8_t width;
 			/* Handle keypresses, yada yada. */
@@ -295,9 +290,9 @@ uint8_t layouts_menu(void) {
 			else if(key_time < 10) key_time++;
 
 			key = os_GetCSC();
-			if(chars[key]) {
+			if(getkey_letters[key]) {
 				char str[2] = {0};
-				*str = chars[key];
+				*str = getkey_letters[key];
 
 				dbg_sprintf(dbgout, "key %u, %s\n", key, str);
 
@@ -314,7 +309,7 @@ uint8_t layouts_menu(void) {
 			/* gooey */
 			gfx_FillScreen(BACKGROUND_COLOR);
 
-			/* Draw the margin and highschore inset */
+			/* Draw the margin and highscore inset */
 			gfx_SetColor(BOTTOM_COLOR);
 			gfx_FillRectangle(0, 0, 10, LCD_HEIGHT);
 			gfx_FillRectangle(LCD_WIDTH / 2, LCD_HEIGHT / 2, LCD_WIDTH / 2, LCD_HEIGHT / 2);
@@ -325,7 +320,7 @@ uint8_t layouts_menu(void) {
 			/* Draw the layout view */
 			/* This probably needs to be fast, so no isometric awesomeness. */
 			/* Loop through each slot */
-			/* Use 6 by 10 tiles, or a 3, 5 offset ammount per slot coord */
+			/* Use 6 by 10 tiles, or a 3, 5 offset amount per slot coord */
 			gfx_SetColor(WHITE);
 			for(i = 0; i < TILE_TYPES * 4; i++) {
 				gfx_FillRectangle(LCD_WIDTH * 3 / 4 - TILES_X * 3 + 3 * layouts[selection].slots[i].x,
@@ -334,13 +329,13 @@ uint8_t layouts_menu(void) {
 
 			/* Draw the layout names */
 			gfx_SetTextScale(1, 1);
-			for(i = selection >= 10 ? selection - 10 : 0; i < selection + 10 && i < meta.num_layouts; i++) {
-				width = gfx_GetStringWidth(&layouts[i].name);
+			for(i = (uint24_t) (selection >= 10 ? selection - 10 : 0); i < selection + 10 && i < meta.num_layouts; i++) {
+				width = gfx_GetStringWidth(layouts[i].name);
 				gfx_SetTextFGColor(i == selection ? WHITE : SIDE_COLOR);
-				gfx_PrintStringXY(&layouts[i].name, (LCD_WIDTH / 2 + 5 - width) / 2, (LCD_HEIGHT - TEXT_HEIGHT) / 2 - 12 * (selection - i));
+				gfx_PrintStringXY(layouts[i].name, (LCD_WIDTH / 2 + 5 - width) / 2, (LCD_HEIGHT - TEXT_HEIGHT) / 2 - 12 * (selection - i));
 			}
 
-			width = gfx_GetStringWidth(&layouts[selection].name);
+			width = gfx_GetStringWidth(layouts[selection].name);
 
 			/* Draw some pretty lines */
 			gfx_SetColor(WHITE);
@@ -353,12 +348,12 @@ uint8_t layouts_menu(void) {
 
 			/* Actual high scores */
 			for(i = 0; i < SCORES; i++) {
-				char playername[PLAYER_NAME_LENGTH];
+				char player_name[PLAYER_NAME_LENGTH];
 				uint24_t time;
 				uint24_t minutes;
 				uint8_t name_width;
 
-				time = get_hs(&layouts[selection].name, i, playername);
+				time = get_hs(layouts[selection].name, i, player_name);
 
 				gfx_SetTextXY(LCD_WIDTH / 2 + 8, LCD_HEIGHT / 2 + 16 + 12 * i);
 
@@ -385,8 +380,8 @@ uint8_t layouts_menu(void) {
 					gfx_PrintUInt(time % 1000, 3);
 				}
 
-				name_width = gfx_GetStringWidth(playername);
-				gfx_PrintStringXY(playername, LCD_WIDTH - name_width - 2, gfx_GetTextY());
+				name_width = gfx_GetStringWidth(player_name);
+				gfx_PrintStringXY(player_name, LCD_WIDTH - name_width - 2, gfx_GetTextY());
 			}
 
 			gfx_BlitBuffer();
@@ -420,7 +415,8 @@ void packs_menu(void) {
 
 	/* Main loop */
 	while(true) {
-		uint8_t i, width;
+		uint8_t width;
+		uint24_t i;
 		/* Handle keypresses */
 		kb_Scan();
 
@@ -462,14 +458,14 @@ void packs_menu(void) {
 
 		/* Draw pack names */
 		for(i = 0; i < selection; i++) {
-			gfx_PrintStringXY(&names[i], LCD_WIDTH * 5 / 12 - gfx_GetStringWidth(&names[i]) / 2, LCD_HEIGHT / 2 - 12 - 12 * (selection - i));
+			gfx_PrintStringXY(names[i], LCD_WIDTH * 5 / 12 - gfx_GetStringWidth(names[i]) / 2, LCD_HEIGHT / 2 - 12 - 12 * (selection - i));
 		}
 		gfx_SetTextScale(2, 2);
-		width = gfx_GetStringWidth(&names[selection]);
-		gfx_PrintStringXY(&names[selection], LCD_WIDTH * 5 / 12 - width / 2, LCD_HEIGHT / 2 - TEXT_HEIGHT);
+		width = gfx_GetStringWidth(names[selection]);
+		gfx_PrintStringXY(names[selection], LCD_WIDTH * 5 / 12 - width / 2, LCD_HEIGHT / 2 - TEXT_HEIGHT);
 		gfx_SetTextScale(1, 1);
-		for(i = selection + 1; i < num_names; i++) {
-			gfx_PrintStringXY(&names[i], LCD_WIDTH * 5 / 12 - gfx_GetStringWidth(&names[i]) / 2, LCD_HEIGHT / 2 + 4 + 12 * (i - selection));
+		for(i = (uint24_t) (selection + 1); i < num_names; i++) {
+			gfx_PrintStringXY(names[i], LCD_WIDTH * 5 / 12 - gfx_GetStringWidth(names[i]) / 2, LCD_HEIGHT / 2 + 4 + 12 * (i - selection));
 		}
 		/* CSS ain't got nothin' on this. */
 
@@ -483,11 +479,11 @@ void packs_menu(void) {
 }
 
 void credits(void) {
-	int i = 0;
+	uint24_t i = 0;
 	const char *lines[] = {
 		"Made by commandblockguy",
 		"",
-		"Avaliable on Cemetech.net",
+		"Available on Cemetech.net",
 		"https://discord.gg/DZbmraw",
 		"",
 		"Thanks to MateoC for creating the C toolchain",
@@ -511,7 +507,7 @@ void credits(void) {
 	gfx_SetTextScale(1, 1);
 
 	/* Iterate through all lines */
-	for(i = 0; i < sizeof(lines) / sizeof(lines[0]); i++) {
+	for(i = 0; i < (uint24_t)(sizeof(lines) / sizeof(lines[0])); i++) {
 		gfx_PrintStringXY(lines[i], 6, 32 + TEXT_HEIGHT + 12 * i);
 	}
 
@@ -523,7 +519,7 @@ void credits(void) {
 }
 
 void how_to(void) {
-	int i = 0;
+	uint24_t i = 0;
 	const char *lines[] = {
 		"Controls:",
 		"Use the arrow keys to control the cursor",
@@ -552,7 +548,7 @@ void how_to(void) {
 	gfx_PrintStringXY("How-To", (LCD_WIDTH - gfx_GetStringWidth("How-To")) / 2, 4);
 
 	/* Iterate through all lines */
-	for(i = 0; i < sizeof(lines) / sizeof(lines[0]); i++) {
+	for(i = 0; i < (uint24_t)(sizeof(lines) / sizeof(lines[0])); i++) {
 		gfx_PrintStringXY(lines[i], 6, 16 + TEXT_HEIGHT + 12 * i);
 	}
 
@@ -618,8 +614,8 @@ void win_popup(void) {
 
 	/* High score display */
 	for(i = 0; i < SCORES; i++) {
-		char playername[PLAYER_NAME_LENGTH];
-		uint24_t time = get_hs(game.layout.name, i, playername);
+		char player_name[PLAYER_NAME_LENGTH];
+		uint24_t time = get_hs(game.layout.name, i, player_name);
 		uint24_t minutes;
 
 		gfx_SetTextXY(LCD_WIDTH / 3 + 4, LCD_HEIGHT / 4 + 8 + 3 * TEXT_HEIGHT + 10 * i);

@@ -1,15 +1,10 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <tice.h>
 
-#include <math.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
-#include <graphx.h>
-#include <keypadc.h>
 #include <fileioc.h>
 
 #include <debug.h>
@@ -64,8 +59,6 @@ void init_hs_appvar(void) {
 
 		/* Copy each layout's scores over */
 		for(i = 0; i < num_layouts; i++) {
-			uint8_t rank;
-
 			/* Copy the old scores into the new score struct */
 			ti_Read(&scores, sizeof(legacy_score_entry_t), 1, legacy_var);
 
@@ -95,7 +88,7 @@ void init_hs_appvar(void) {
 /* Time in timer units, name of layout */
 void add_hs(uint24_t time, char* name, char* player) {
 	ti_var_t appvar;
-	uint8_t num_layouts, i;
+	uint24_t i;
 	score_entry_t scores;
 	score_header_t header;
 
@@ -120,7 +113,7 @@ void add_hs(uint24_t time, char* name, char* player) {
 			/* Strings are the same */
 
 			/* Rewind the appvar */
-			ti_Seek(-sizeof(score_entry_t), SEEK_CUR, appvar);
+			ti_Seek((int)-sizeof(score_entry_t), SEEK_CUR, appvar);
 
 			/* Sort the time into the times */
 			for(rank = SCORES - 1; rank >= 0  && scores.times[rank] > time; rank--) {
@@ -158,9 +151,9 @@ void add_hs(uint24_t time, char* name, char* player) {
 	scores.times[0] = time;
 	strcpy(scores.players[0], player);
 
-	/* Initialize usused times to -1 ms */
+	/* Initialize unused times to -1 ms */
 	for(i = 1; i < SCORES; i++) {
-		scores.times[i] = -1;
+		scores.times[i] = (uint24_t) -1;
 	}
 
 	/* Add the scores the end of the appvar */
@@ -176,7 +169,7 @@ void add_hs(uint24_t time, char* name, char* player) {
 /* Player name is copied into player */
 uint24_t get_hs(char* name, uint8_t rank, char *player) {
 	ti_var_t appvar;
-	uint8_t num_layouts, i;
+	uint24_t i;
 	score_entry_t scores;
 	score_header_t header;
 
@@ -191,7 +184,7 @@ uint24_t get_hs(char* name, uint8_t rank, char *player) {
 	/* Return if an unsupported version */
 	if(header.version != CURRENT_HS_VERSION) {
 		*player = 0;
-		return -1;
+		return (uint24_t) -1;
 	}
 
 	for(i = 0; i < header.num_layouts; i++) {
@@ -209,7 +202,7 @@ uint24_t get_hs(char* name, uint8_t rank, char *player) {
 	}
 
 	/* No score has been found */
-	return -1;
+	return (uint24_t) -1;
 }
 
 /* Stores the first max pack names in dest, then returns the number of packs found */
@@ -221,7 +214,7 @@ uint8_t get_packs(char dest[][9], uint8_t max) {
 	ti_CloseAll();
 
 	for(found = 0; found < max; found++) {
-		var_name = ti_Detect(&search_pos, "MJ");
+		var_name = ti_Detect((void **) &search_pos, "MJ");
 		if(var_name == NULL) return found;
 		strcpy(dest[found], var_name);
 	}
@@ -235,7 +228,7 @@ void set_last_level(char *pack, char *level) {
 	ti_CloseAll();
 	var = ti_Open(save_appvar, "w+");
 	/* Write the magic number 255 to the save */
-	ti_PutC(255, var);
+	ti_PutC((char)255, var);
 	/* Write pack and level name */
 	ti_Write(pack, sizeof(char), 9, var);
 	ti_Write(level, sizeof(char), NAME_LENGTH, var);

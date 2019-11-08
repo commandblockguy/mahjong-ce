@@ -8,20 +8,14 @@
 */
 
 #include <stdbool.h>
-#include <stddef.h>
 #include <stdint.h>
 #include <tice.h>
 
-#include <math.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include <graphx.h>
 #include <keypadc.h>
-#include <fileioc.h>
-
-#include <debug.h>
 
 #include "game.h"
 #include "gfx.h"
@@ -29,7 +23,6 @@
 #include "logic.h"
 #include "storage.h"
 #include "tile.h"
-#include "layouts.h"
 #include "ui.h"
 
 game_t game;
@@ -82,6 +75,7 @@ void main(void) {
 				credits();
 				break;
 			case MM_EXIT:
+			default:
 				cleanup();
 				return;
 		}
@@ -218,8 +212,9 @@ void play(void) {
 					}
 					break;
 				case 2:
+				default:
 					/* Exit */
-					add_hs(0xFF0000 | game.remaining_tiles, game.layout.name, "Test\0\0\0\0");
+					add_hs((uint24_t)0xFF0000 | game.remaining_tiles, game.layout.name, "Test\0\0\0\0");
 					break;
 			}
 		}

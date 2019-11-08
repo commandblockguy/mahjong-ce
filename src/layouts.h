@@ -17,7 +17,7 @@
 typedef struct {
 	uint8_t x; /* For X and Y, divide by 2 to get the tile x value */
 	uint8_t y; /* If odd, the tile will be offset */
-	uint8_t z; /* Z requires no divinding */
+	uint8_t z; /* Z requires no dividing */
 } slot_t;
 
 typedef struct {

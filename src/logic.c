@@ -1,16 +1,8 @@
 #include <stdbool.h>
-#include <stddef.h>
 #include <stdint.h>
 #include <tice.h>
 
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
-#include <graphx.h>
-#include <keypadc.h>
-#include <fileioc.h>
 
 #include "game.h"
 #include "gfx.h"
@@ -111,7 +103,7 @@ bool top_blocked(uint8_t x, uint8_t y, uint8_t z) {
 }
 
 /* Returns true if tiles were removed successfully */
-bool remove_tiles(uint8_t x1, uint8_t y1,  uint8_t z1, uint8_t x2, uint8_t y2, uint8_t z2) {
+bool remove_tiles(uint8_t x1, uint8_t y1, uint8_t z1, uint8_t x2, uint8_t y2, uint8_t z2) {
 	undo_t *undo;
 	/* Check if tiles are the same */
 	if(get_type(x1, y1, z1) != get_type(x2, y2, z2)) return false;
@@ -154,7 +146,7 @@ bool remove_tiles(uint8_t x1, uint8_t y1,  uint8_t z1, uint8_t x2, uint8_t y2, u
 	return true;
 }
 
-/* Calcuate the number of possible moves */
+/* Calculate the number of possible moves */
 uint8_t calc_num_moves(void) {
 	uint8_t num_removable[TILE_TYPES] = {0};
 	uint8_t x, y, z, i, moves = 0;
@@ -188,6 +180,7 @@ uint8_t calc_num_moves(void) {
 			case 4:
 				moves += 6;
 				break;
+		    default: ;
 		}
 	}
 
@@ -248,9 +241,27 @@ pos_t find_highlight(uint24_t cursor_x, uint8_t cursor_y) {
 	return ret;
 }
 
+// new algo:
+// pick value based on system time
+// fill all locations with blank tiles
+// call recursive function with depth = 0
+// recursive(depth):
+//  if depth = 2*TILE_TYPES, return
+//  count # of removable tiles
+//  if 0, return false
+//  for attempt in 0..removable*(removable-1):
+//   select two random removable tiles, such that no pair is repeated from a previous iteration
+//   add the locations to the result
+//   recursive(depth + 1)
+//   if false, replace the two tiles and remove from result
+//   if true, return true
+//  return false
+
+// would require all tiles to be scanned at least 2*TILE_TYPES times
+
 /* Load a layout and randomize tiles */
 void load_layout(layout_t *l, bool random) {
-	int i;
+	tile_t i;
 
 	/* Array to be filled with random tiles */
 	tile_t picks[TILE_TYPES * 4];
@@ -266,7 +277,7 @@ void load_layout(layout_t *l, bool random) {
 			}
 		}
 
-		shuffle(picks, TILE_TYPES * 4);
+		shuffle((uint8_t*)picks, sizeof(picks));
 
 	}
 
@@ -317,7 +328,7 @@ void load_layout(layout_t *l, bool random) {
 
 /* I guess this can go here. */
 /* Why is this even a function? */
-void set_highlight(int8_t x, int8_t y, int8_t z) {
+void set_highlight(uint8_t x, uint8_t y, uint8_t z) {
 	game.highlight.x = x;
 	game.highlight.y = y;
 	game.highlight.z = z;
