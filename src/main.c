@@ -16,6 +16,7 @@
 
 #include <graphx.h>
 #include <keypadc.h>
+#include <debug.h>
 
 #include "game.h"
 #include "gfx.h"
@@ -33,6 +34,8 @@ void cleanup(void);
 void main(void) {
 	int option;
 	uint24_t timer;
+
+	dbg_sprintf(dbgout, "started\n");
 
 	/* Set the random seed */
 	srand(rtc_Time());
@@ -185,6 +188,7 @@ void play(void) {
 		draw_cursor(cursor_x, cursor_y);
 
 		if(game.status == LOSE) {
+			char name_buf[PLAYER_NAME_LENGTH];
 			set_last_level(game.pack_name, game.layout.name);
 			switch(lose_popup()) {
 				case 0:
@@ -214,7 +218,8 @@ void play(void) {
 				case 2:
 				default:
 					/* Exit */
-					add_hs((uint24_t)0xFF0000 | game.remaining_tiles, game.layout.name, "Test\0\0\0\0");
+					enter_name(name_buf);
+					add_hs((uint24_t)0xFF0000 | game.remaining_tiles, game.layout.name, name_buf);
 					break;
 			}
 		}
@@ -222,9 +227,11 @@ void play(void) {
 
 	/* If a win, add the time to the high scores, and set the last played level */
 	if(game.status == WIN) {
+		char name_buf[PLAYER_NAME_LENGTH];
 		/* Disable the timer, so we can reference it later */
 		timer_Control = TIMER1_DISABLE;
-		add_hs(timer_1_Counter / 33, game.layout.name, "Test\0\0\0\0");
+		enter_name(name_buf);
+		add_hs(timer_1_Counter / 33, game.layout.name, name_buf);
 		set_last_level(game.pack_name, game.layout.name);
 		win_popup();
 	}

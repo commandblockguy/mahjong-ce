@@ -12,7 +12,7 @@
 #include <string.h>
 
 #define TILE_TYPES 36
-#define NAME_LENGTH 16
+#define LEVEL_NAME_LENGTH 16
 
 typedef struct {
 	uint8_t x; /* For X and Y, divide by 2 to get the tile x value */
@@ -24,7 +24,7 @@ typedef struct {
 	uint8_t version; //Latest: 1
 	uint24_t start_x;
 	uint8_t start_y;
-	char name[NAME_LENGTH];
+	char name[LEVEL_NAME_LENGTH];
 	slot_t slots[TILE_TYPES * 4];
 } layout_t;
 

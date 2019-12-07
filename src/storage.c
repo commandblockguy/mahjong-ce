@@ -122,10 +122,11 @@ void add_hs(uint24_t time, char* name, char* player) {
 					memcpy(scores.players[rank + 1], scores.players[rank], sizeof(scores.players[0]));
 				}
 			}
+			rank++;
 
-			if(rank + 1 < SCORES) {
-				scores.times[rank + 1] = time;
-				memcpy(scores.players[rank + 1], player, sizeof(scores.players[0]));
+			if(rank < SCORES) {
+				scores.times[rank] = time;
+				memcpy(scores.players[rank], player, sizeof(scores.players[0]));
 			}
 
 			ti_Write(&scores, sizeof(score_entry_t), 1, appvar);
@@ -159,6 +160,8 @@ void add_hs(uint24_t time, char* name, char* player) {
 	/* Add the scores the end of the appvar */
 	ti_Seek(0, SEEK_END, appvar);
 	ti_Write(&scores, sizeof(score_entry_t), 1, appvar);
+
+	ti_SetArchiveStatus(appvar, true);
 
 	ti_Close(appvar);
 
@@ -231,7 +234,7 @@ void set_last_level(char *pack, char *level) {
 	ti_PutC((char)255, var);
 	/* Write pack and level name */
 	ti_Write(pack, sizeof(char), 9, var);
-	ti_Write(level, sizeof(char), NAME_LENGTH, var);
+	ti_Write(level, sizeof(char), LEVEL_NAME_LENGTH, var);
 
 	ti_SetArchiveStatus(true, var);
 
@@ -279,7 +282,7 @@ uint24_t read_save(void) {
 	if(ti_GetC(var) == 255) {
 		/* If so, read the level and pack names */
 		ti_Read(game.pack_name, sizeof(char), 9, var);
-		ti_Read(game.layout.name, sizeof(char), NAME_LENGTH, var);
+		ti_Read(game.layout.name, sizeof(char), LEVEL_NAME_LENGTH, var);
 		ti_Close(var);
 		return 0;
 	} else {

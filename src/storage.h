@@ -7,12 +7,12 @@
 #define CURRENT_HS_VERSION 1
 
 typedef struct {
-	char name[NAME_LENGTH];
+	char name[LEVEL_NAME_LENGTH];
 	uint24_t times[SCORES];
 } legacy_score_entry_t;
 
 typedef struct {
-	char name[NAME_LENGTH];
+	char name[LEVEL_NAME_LENGTH];
 	uint24_t times[SCORES];
 	char players[SCORES][PLAYER_NAME_LENGTH];
 } score_entry_t;

@@ -30,7 +30,8 @@
 
 #define PACKS_MENU_LINES 30
 
-const char getkey_letters[] = "\0\0\0\0\0\0\0\0\0\0\0WRMH\0\0\0\0VQLG\0\0\0ZUPKFC\0\0YTOJEB\0\0XSNIDA\0\0\0\0\0\0\0\0";
+const char getkey_letters[] = "\0\0\0\0\0\0\0\0\0\0\"WRMH\0\0?\0VQLG\0\0:ZUPKFC\0 YTOJEB\0\0XSNIDA\0\0\0\0\0\0\0\0";
+const char getkey_numeric[] = "\0\0\0\0\0\0\0\0\0\0+-*/^\0\0-369)\0\0\0.258(\0\0\0000147,\0\0\0\0>\0\0\0\0\0\0\0\0\0\0\0\0\0";
 
 uint8_t main_menu(void) {
 	int selection = 0, i, start, offset;
@@ -690,6 +691,124 @@ uint8_t lose_popup(void) {
 			gfx_PrintStringXY(strs[i], LCD_WIDTH / 3 + 4, LCD_HEIGHT / 4 + 16 + 3 * TEXT_HEIGHT + 20 * i);
 		}
 	
+		gfx_BlitBuffer();
+	}
+}
+
+enum entry_mode {
+	UPPERCASE,
+	LOWERCASE,
+	NUMERIC
+};
+
+void enter_name(char str[PLAYER_NAME_LENGTH]) {
+	uint8_t pos = 0; // the position new characters will be inserted into
+	uint8_t end = 0; // the index of the null byte
+	uint8_t mode = 0;
+	bool key_pressed = true;
+	uint8_t key_value;
+	uint8_t blink_value = 0;
+	uint8_t i;
+
+	memset(str, 0, PLAYER_NAME_LENGTH);
+
+	while(true) {
+		kb_Scan();
+
+		key_value = os_GetCSC();
+
+		if(!key_pressed) {
+			if(kb_IsDown(kb_KeyClear)) {
+				memset(str, 0, PLAYER_NAME_LENGTH);
+				return;
+			}
+			if(kb_IsDown(kb_KeyEnter)) {
+				return;
+			}
+
+			if(kb_IsDown(kb_KeyRight) && pos < end) pos++;
+			if(kb_IsDown(kb_KeyLeft) && pos > 0) pos--;
+
+			if(kb_IsDown(kb_KeyDel) && pos != end) {
+				memmove(&str[pos], &str[pos+1], end - pos);
+				end--;
+			}
+
+			if(kb_IsDown(kb_KeyAlpha)) {
+				mode++;
+				if(mode > 2) mode = 0;
+			}
+		}
+
+		key_pressed = false;
+		for(i = 1; i <= 7; i++) {
+			if(kb_Data[i]) key_pressed = true;
+		}
+
+		if(key_value && end < PLAYER_NAME_LENGTH - 1) {
+			char ch;
+			if(mode == NUMERIC) {
+				ch = getkey_numeric[key_value];
+			} else {
+				ch = getkey_letters[key_value];
+				if(mode == LOWERCASE && ch >= 'A' && ch <= 'Z') {
+					// convert to lowercase
+					ch -= ('A' - 'a');
+				}
+			}
+
+			if(ch) {
+				memmove(&str[pos + 1], &str[pos], end - pos + 1);
+				str[pos] = ch;
+				pos++;
+				end++;
+			}
+		}
+
+		gfx_SetColor(INFOBAR_COLOR);
+		gfx_FillRectangle(LCD_WIDTH / 3, LCD_HEIGHT / 4, LCD_WIDTH / 3, LCD_HEIGHT / 2);
+		gfx_SetColor(WHITE);
+		gfx_Rectangle(LCD_WIDTH / 3, LCD_HEIGHT / 4, LCD_WIDTH / 3, LCD_HEIGHT / 2);
+
+		gfx_SetTextFGColor(WHITE);
+		gfx_SetTextScale(3, 3);
+		gfx_PrintStringXY("name", (LCD_WIDTH - gfx_GetStringWidth("name")) / 2, LCD_HEIGHT / 4 + 4);
+		gfx_SetTextScale(1, 1);
+		gfx_HorizLine(LCD_WIDTH / 3, LCD_HEIGHT / 4 + 4 + 3 * TEXT_HEIGHT, LCD_WIDTH / 3);
+
+		for(i = 0; i < PLAYER_NAME_LENGTH - 1; i++) {
+#define SLOT_WIDTH 8
+#define SLOT_GAP 3
+#define BASE_X ((LCD_WIDTH - (SLOT_WIDTH * (PLAYER_NAME_LENGTH - 1) + SLOT_GAP * (PLAYER_NAME_LENGTH - 2))) / 2)
+#define TEXT_Y ((LCD_HEIGHT - TEXT_HEIGHT) / 2)
+#define LINE_Y (TEXT_Y + TEXT_HEIGHT)
+			gfx_SetColor(SIDE_COLOR);
+			if(i < end) {
+				gfx_SetTextXY(BASE_X + i * (SLOT_WIDTH + SLOT_GAP), TEXT_Y);
+				gfx_PrintChar(str[i]);
+			}
+			if(i == pos) {
+				gfx_SetTextXY(BASE_X + i * (SLOT_WIDTH + SLOT_GAP), TEXT_Y + TEXT_HEIGHT + 3);
+				switch(mode) {
+					default:
+					case UPPERCASE:
+						gfx_PrintChar('A');
+						break;
+					case LOWERCASE:
+						gfx_PrintChar('a');
+						break;
+					case NUMERIC:
+						gfx_PrintChar('1');
+						break;
+				}
+				if (blink_value & 32) {
+					gfx_SetColor(WHITE);
+				}
+			}
+			gfx_HorizLine(BASE_X + i * (SLOT_WIDTH + SLOT_GAP), LINE_Y, SLOT_WIDTH);
+		}
+
+		blink_value++;
 		gfx_BlitBuffer();
 	}
 }
