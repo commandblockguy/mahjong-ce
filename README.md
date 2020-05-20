@@ -1,3 +1,5 @@
+*Does not run on OS 5.5.* It's not possible for me to fix this, so don't update your calculator's OS.
+
 # Mahjong Solitaire
 
 Requires the latest [CE C libraries](https://tiny.cc/clibs)
