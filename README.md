@@ -1,11 +1,11 @@
-*Does not run on OS 5.5.* It's not possible for me to fix this, so don't update your calculator's OS.
-
 # Mahjong Solitaire
 
 Requires the latest [CE C libraries](https://tiny.cc/clibs)
 
 To install, you will need TI-Connect CE or TILP.  
 Transfer the C libraries, MAHJONG.8xp, and KYODAI.8xv
+
+On OS 5.5, you will need to use [arTIfiCE](https://yvantt.github.io/arTIfiCE/) to run native programs.
 
 Questions? Ask on [Cemetech](https://www.cemetech.net/forum/viewtopic.php?t=15230)
 
